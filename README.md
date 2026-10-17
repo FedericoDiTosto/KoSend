@@ -135,14 +135,15 @@ keyAlias=kosend
 keyPassword=...
 ```
 
-To render the screens without a phone or emulator:
+To regenerate the screenshots in this README:
 
 ```sh
-./gradlew :app:recordPaparazziDebug
+./gradlew screenshots
 ```
 
-The images land in `app/src/test/snapshots/images/`. The screenshots in this README
-come from `app/src/test/java/dev/kosend/Screenshots.kt`.
+They are rendered from the app's layouts on the JVM, with no device or emulator,
+using [Paparazzi](https://github.com/cashapp/paparazzi). The screens and sample data
+are defined in `app/src/test/java/dev/kosend/ReadmeScreenshots.kt`.
 
 Project layout:
 

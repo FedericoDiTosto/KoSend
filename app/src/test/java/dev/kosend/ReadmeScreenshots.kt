@@ -9,7 +9,7 @@ import com.android.resources.NightMode
 import org.junit.Rule
 import org.junit.Test
 
-class Screenshots {
+class ReadmeScreenshots {
 
     @get:Rule
     val paparazzi = Paparazzi(

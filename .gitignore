@@ -19,6 +19,3 @@ keystore.properties
 
 # Generated previews (the README images live in docs/)
 app/src/test/snapshots/
-
-# Personal notes
-IMPARARE.md

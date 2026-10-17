@@ -63,7 +63,7 @@ class CalibreServer(
                 val s = DatagramSocket(null).apply { reuseAddress = true; bind(InetSocketAddress(p)) }
                 udpSockets.add(s)
                 thread("udp-$p") { discoveryLoop(s) }
-            }.onFailure { Log.w(TAG, "porta UDP $p non disponibile", it) }
+            }.onFailure { Log.w(TAG, "UDP port $p unavailable", it) }
         }
         thread("tcp-accept") { acceptLoop(ss) }
         listener.onStateChanged(State.Waiting(port))
@@ -259,7 +259,7 @@ class CalibreServer(
                     BookStore.update(book.id, BookStatus.ERROR, reply.optString("message").ifEmpty { Messages.REJECTED })
                     return@forEachIndexed
                 }
-                if (op != OK) throw IOException("risposta inattesa a SEND_BOOK: $op")
+                if (op != OK) throw IOException("unexpected reply to SEND_BOOK: $op")
 
                 file.inputStream().use { inp ->
                     val buf = ByteArray(64 * 1024)
@@ -306,17 +306,17 @@ class CalibreServer(
             val len = StringBuilder()
             while (true) {
                 val b = input.read()
-                if (b < 0) throw EOFException("connessione chiusa da KOReader")
+                if (b < 0) throw EOFException("connection closed by KOReader")
                 if (b == '['.code) break
                 if (b in '0'.code..'9'.code) len.append(b.toChar())
             }
-            val size = len.toString().toIntOrNull() ?: throw IOException("lunghezza non valida")
+            val size = len.toString().toIntOrNull() ?: throw IOException("invalid message length")
             val buf = ByteArray(size)
             buf[0] = '['.code.toByte()
             var off = 1
             while (off < size) {
                 val n = input.read(buf, off, size - off)
-                if (n < 0) throw EOFException("connessione chiusa da KOReader")
+                if (n < 0) throw EOFException("connection closed by KOReader")
                 off += n
             }
             val arr = JSONArray(String(buf, Charsets.UTF_8))
@@ -327,9 +327,9 @@ class CalibreServer(
             val (op, data) = try {
                 receive()
             } catch (e: SocketTimeoutException) {
-                throw IOException("KOReader non risponde", e)
+                throw IOException("KOReader is not responding", e)
             }
-            if (op != OK) throw IOException("risposta inattesa: $op")
+            if (op != OK) throw IOException("unexpected reply: $op")
             return data
         }
     }
