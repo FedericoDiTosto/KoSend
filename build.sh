@@ -24,9 +24,3 @@ mkdir -p dist
 APK="dist/KoSend-$VERSION-$TYPE.apk"
 cp "$OUT" "$APK"
 echo "APK ready: $APK"
-
-if command -v powershell.exe >/dev/null 2>&1; then
-    WIN_HOME=$(powershell.exe -NoProfile -Command '[Environment]::GetFolderPath("UserProfile")' | tr -d '\r')
-    DL="$(wslpath "$WIN_HOME")/Downloads"
-    [ -d "$DL" ] && cp "$APK" "$DL/" && printf "Also copied to: %s\\Downloads\n" "$WIN_HOME"
-fi
