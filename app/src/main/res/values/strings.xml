@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">KoSend</string>
+    <string name="tagline">Books from your phone to KOReader</string>
+    <string name="share_label">Send to Kindle</string>
+
+    <string name="server_switch">Server on</string>
+    <string name="disconnect">Disconnect Kindle</string>
+    <string name="add_books">Add books</string>
+
+    <string name="status_off_title">Server off</string>
+    <string name="status_off_detail">Turn it on to make your phone visible to the Kindle.</string>
+    <string name="status_waiting_title">Waiting for the Kindle</string>
+    <string name="status_waiting_detail">Visible on the network as %1$s</string>
+    <string name="status_waiting_detail_noip">Visible on the network on port %1$d</string>
+    <string name="status_connected_title">Kindle connected</string>
+    <string name="status_error_title">The server could not start</string>
+
+    <string name="info_title">How to connect your Kindle</string>
+    <string name="info_step1">Turn the server on with the switch above and keep KoSend open while sending.</string>
+    <string name="info_step2">On the Kindle, open KOReader and tap the top edge of the screen to show the menu. Open the wrench tab, choose Calibre, then Connect.</string>
+    <string name="info_step3">The first time, KOReader asks which folder to save books in. Then it finds your phone and receives the queued books one after another. Books you add while connected are sent right away.</string>
+    <string name="info_note_ip">Your phone and Kindle must be on the same Wi-Fi network. If the Kindle can’t find your phone, in KOReader open Calibre, then Wireless settings, and set Server address to Manual: IP %1$s, port %2$d.</string>
+    <string name="info_note_noip">Your phone and Kindle must be on the same Wi-Fi network. If the Kindle can’t find your phone, you can enter the address manually in KOReader under Calibre, Wireless settings: it appears here while the server is on.</string>
+
+    <string name="queue">Queue</string>
+    <string name="clear_sent">Clear sent</string>
+    <string name="empty_title">No books in the queue</string>
+    <string name="empty_text">Add a book with the button below, or share it from another app and choose KoSend.</string>
+
+    <string name="book_pending">Queued</string>
+    <string name="book_sending">Sending, %1$d%%</string>
+    <string name="book_sent">Sent</string>
+    <string name="book_error">Error</string>
+
+    <string name="action_retry">Send again</string>
+    <string name="action_remove">Remove from queue</string>
+
+    <string name="toast_skipped">Unsupported format: %1$s</string>
+
+    <string name="error_no_port">No free port between 9090 and 9099</string>
+    <string name="error_missing_file">File not found</string>
+    <string name="error_rejected">Rejected by KOReader</string>
+    <string name="error_unsupported">KOReader doesn’t accept .%1$s files</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_open">Open settings</string>
+    <string name="back">Back</string>
+    <string name="settings_section_general">General</string>
+    <string name="settings_section_about">About</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_version">Version</string>
+    <string name="language_system">System default</string>
+    <string name="language_italian" translatable="false">Italiano</string>
+    <string name="language_english" translatable="false">English</string>
+
+    <plurals name="toast_added">
+        <item quantity="one">%1$d book added to the queue</item>
+        <item quantity="other">%1$d books added to the queue</item>
+    </plurals>
+    <plurals name="queue_pending">
+        <item quantity="one">%1$d to send</item>
+        <item quantity="other">%1$d to send</item>
+    </plurals>
+    <plurals name="queue_total">
+        <item quantity="one">%1$d book</item>
+        <item quantity="other">%1$d books</item>
+    </plurals>
+</resources>

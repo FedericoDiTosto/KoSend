@@ -1,0 +1,24 @@
+# Build output
+.gradle/
+.kotlin/
+build/
+app/build/
+dist/
+
+# Local machine settings
+local.properties
+.idea/
+*.iml
+.vscode/tasks.json
+.vscode/settings.json
+
+# Signing key: never commit
+keystore.properties
+*.jks
+*.keystore
+
+# Generated previews (the README images live in docs/)
+app/src/test/snapshots/
+
+# Personal notes
+IMPARARE.md

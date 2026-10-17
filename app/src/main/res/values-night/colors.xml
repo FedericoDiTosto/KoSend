@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#9CD0BF</color>
+    <color name="on_primary">#0B2A22</color>
+    <color name="primary_container">#204A40</color>
+    <color name="on_primary_container">#C8EADF</color>
+    <color name="secondary_container">#3A3731</color>
+    <color name="on_secondary_container">#E8E3D9</color>
+    <color name="background">#141412</color>
+    <color name="surface">#141412</color>
+    <color name="surface_container">#1F1E1B</color>
+    <color name="surface_container_high">#292825</color>
+    <color name="surface_container_highest">#34322F</color>
+    <color name="surface_container_low">#1A1917</color>
+    <color name="on_surface">#E8E5DF</color>
+    <color name="on_surface_variant">#B4AFA5</color>
+    <color name="outline">#8C877D</color>
+    <color name="outline_variant">#3F3C37</color>
+    <color name="error">#F2B8B5</color>
+    <color name="success">#8FD5A6</color>
+    <color name="success_container">#1F3A29</color>
+    <color name="error_container">#4A1F1C</color>
+    <color name="info_container">#1F2A32</color>
+    <color name="on_info_container">#CFE0EC</color>
+    <color name="badge_epub">#3F7A6A</color>
+    <color name="badge_pdf">#A9584A</color>
+    <color name="badge_mobi">#7564A6</color>
+    <color name="badge_other">#77726A</color>
+</resources>

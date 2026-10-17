@@ -1,0 +1,44 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you saw instead.
+    validations:
+      required: true
+  - type: input
+    id: android
+    attributes:
+      label: Phone and Android version
+      placeholder: Pixel 7, Android 15
+    validations:
+      required: true
+  - type: input
+    id: kindle
+    attributes:
+      label: Kindle model and firmware
+      placeholder: Kindle Basic (11th gen), 5.18.1
+  - type: input
+    id: koreader
+    attributes:
+      label: KOReader version
+      placeholder: v2026.07.1
+    validations:
+      required: true
+  - type: dropdown
+    id: network
+    attributes:
+      label: Does the Kindle find the phone on its own?
+      options:
+        - "Yes"
+        - "No, I had to enter the address manually"
+        - "No, it doesn't connect at all"
+  - type: textarea
+    id: log
+    attributes:
+      label: KOReader log (optional)
+      description: The lines mentioning "calibre" from koreader/crash.log on the Kindle.
+      render: text

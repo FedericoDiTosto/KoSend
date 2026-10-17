@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tagline">Libri dal telefono a KOReader</string>
+    <string name="share_label">Invia al Kindle</string>
+
+    <string name="server_switch">Server attivo</string>
+    <string name="disconnect">Disconnetti il Kindle</string>
+    <string name="add_books">Aggiungi libri</string>
+
+    <string name="status_off_title">Server spento</string>
+    <string name="status_off_detail">Attivalo per rendere il telefono visibile al Kindle.</string>
+    <string name="status_waiting_title">In attesa del Kindle</string>
+    <string name="status_waiting_detail">Visibile in rete come %1$s</string>
+    <string name="status_waiting_detail_noip">Visibile in rete sulla porta %1$d</string>
+    <string name="status_connected_title">Kindle collegato</string>
+    <string name="status_error_title">Il server non è partito</string>
+
+    <string name="info_title">Come collegare il Kindle</string>
+    <string name="info_step1">Attiva il server con l’interruttore qui sopra e tieni KoSend aperta mentre invii.</string>
+    <string name="info_step2">Sul Kindle apri KOReader e tocca il bordo in alto dello schermo per aprire il menu. Apri la scheda con la chiave inglese, scegli Calibre e poi Connetti.</string>
+    <string name="info_step3">La prima volta KOReader chiede in quale cartella salvare i libri. Poi trova il telefono da solo e riceve i libri in coda, uno dopo l’altro. Quelli che aggiungi durante il collegamento partono subito.</string>
+    <string name="info_note_ip">Telefono e Kindle devono essere sulla stessa rete Wi-Fi. Se il Kindle non trova il telefono, in KOReader apri Calibre, poi Impostazioni Wi-Fi, e imposta Indirizzo del server su Manuale: IP %1$s, porta %2$d.</string>
+    <string name="info_note_noip">Telefono e Kindle devono essere sulla stessa rete Wi-Fi. Se il Kindle non trova il telefono, puoi inserire l’indirizzo a mano in KOReader, in Calibre, Impostazioni Wi-Fi: lo trovi qui quando il server è attivo.</string>
+
+    <string name="queue">Coda</string>
+    <string name="clear_sent">Rimuovi inviati</string>
+    <string name="empty_title">Nessun libro in coda</string>
+    <string name="empty_text">Aggiungi un libro con il pulsante in basso, oppure condividilo da un’altra app scegliendo KoSend.</string>
+
+    <string name="book_pending">In coda</string>
+    <string name="book_sending">Invio in corso, %1$d%%</string>
+    <string name="book_sent">Inviato</string>
+    <string name="book_error">Errore</string>
+
+    <string name="action_retry">Invia di nuovo</string>
+    <string name="action_remove">Rimuovi dalla coda</string>
+
+    <string name="toast_skipped">Formato non supportato: %1$s</string>
+    <string name="error_no_port">Nessuna porta libera tra 9090 e 9099</string>
+    <string name="error_missing_file">File non trovato</string>
+    <string name="error_rejected">Rifiutato da KOReader</string>
+    <string name="error_unsupported">KOReader non accetta i file .%1$s</string>
+    <string name="settings_title">Impostazioni</string>
+    <string name="settings_open">Apri le impostazioni</string>
+    <string name="back">Indietro</string>
+    <string name="settings_section_general">Generali</string>
+    <string name="settings_section_about">Informazioni</string>
+    <string name="settings_language">Lingua</string>
+    <string name="settings_version">Versione</string>
+    <string name="language_system">Lingua del sistema</string>
+
+    <plurals name="toast_added">
+        <item quantity="one">%1$d libro aggiunto alla coda</item>
+        <item quantity="other">%1$d libri aggiunti alla coda</item>
+    </plurals>
+    <plurals name="queue_pending">
+        <item quantity="one">%1$d da inviare</item>
+        <item quantity="other">%1$d da inviare</item>
+    </plurals>
+    <plurals name="queue_total">
+        <item quantity="one">%1$d libro</item>
+        <item quantity="other">%1$d libri</item>
+    </plurals>
+</resources>
