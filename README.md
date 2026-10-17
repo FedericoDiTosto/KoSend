@@ -161,6 +161,10 @@ design/                logo and README artwork (VectorCraft sources)
 docs/                  images used by this README
 ```
 
+## Contributing
+
+Bug reports, translations and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## License
 
 KoSend is free software, released under the [GNU General Public License v3.0](LICENSE).

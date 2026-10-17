@@ -41,6 +41,9 @@ android {
             signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
+    buildFeatures {
+        buildConfig = true
+    }
     androidResources {
         generateLocaleConfig = true
     }
