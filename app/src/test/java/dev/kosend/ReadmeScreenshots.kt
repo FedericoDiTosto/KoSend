@@ -71,7 +71,7 @@ class ReadmeScreenshots {
         paparazzi.unsafeUpdateConfig(deviceConfig = DeviceConfig.PIXEL_6.copy(locale = "en"))
         val view = paparazzi.inflate<View>(R.layout.activity_settings)
         view.findViewById<android.widget.TextView>(R.id.language_value).setText(R.string.language_system)
-        view.findViewById<android.widget.TextView>(R.id.version_value).text = "1.0"
+        view.findViewById<android.widget.TextView>(R.id.version_value).text = "1.0.0"
         paparazzi.snapshot(view)
     }
 
