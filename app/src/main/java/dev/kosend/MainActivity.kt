@@ -169,7 +169,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun onBookTapped(book: Book) {
         val actions = mutableListOf<Pair<Int, () -> Unit>>()
-        if (book.status == BookStatus.ERROR || book.status == BookStatus.SENT) {
+        val canResend = book.status == BookStatus.ERROR || book.status == BookStatus.SENT
+        if (canResend && File(book.path).exists()) {
             actions.add(R.string.action_retry to {
                 BookStore.retry(book.id)
                 ServerController.sendPending()

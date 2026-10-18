@@ -69,6 +69,81 @@
 
             <TextView
                 style="@style/SettingsSection"
+                android:text="@string/settings_section_storage" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="?attr/materialCardViewFilledStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="?attr/colorSurfaceContainer"
+                app:cardCornerRadius="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        style="@style/SettingsRow"
+                        android:background="@null">
+
+                        <ImageView
+                            style="@style/SettingsRowIcon"
+                            android:src="@drawable/ic_menu_book" />
+
+                        <LinearLayout style="@style/SettingsRowText">
+
+                            <TextView
+                                style="@style/SettingsRowTitle"
+                                android:text="@string/settings_storage_used" />
+
+                            <TextView
+                                android:id="@+id/storage_value"
+                                style="@style/SettingsRowValue" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/delete_after_send_row"
+                        style="@style/SettingsRow">
+
+                        <ImageView
+                            style="@style/SettingsRowIcon"
+                            android:src="@drawable/ic_delete" />
+
+                        <LinearLayout style="@style/SettingsRowText">
+
+                            <TextView
+                                style="@style/SettingsRowTitle"
+                                android:text="@string/settings_delete_after_send" />
+
+                            <TextView
+                                style="@style/SettingsRowValue"
+                                android:text="@string/settings_delete_after_send_detail" />
+                        </LinearLayout>
+
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/delete_after_send_switch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:clickable="false"
+                            android:focusable="false"
+                            android:importantForAccessibility="no" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                style="@style/SettingsRowValue"
+                android:layout_width="match_parent"
+                android:layout_marginTop="8dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:text="@string/settings_storage_note" />
+
+            <TextView
+                style="@style/SettingsSection"
                 android:text="@string/settings_section_about" />
 
             <com.google.android.material.card.MaterialCardView

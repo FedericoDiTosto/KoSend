@@ -48,6 +48,11 @@
     <string name="settings_section_general">General</string>
     <string name="settings_section_about">About</string>
     <string name="settings_language">Language</string>
+    <string name="settings_section_storage">Storage</string>
+    <string name="settings_storage_used">Space used</string>
+    <string name="settings_delete_after_send">Delete after sending</string>
+    <string name="settings_delete_after_send_detail">Free up space as soon as KOReader has the book. It stays in the list as sent, but can’t be sent again.</string>
+    <string name="settings_storage_note">KoSend keeps its own copy of every book you add and never touches the original file. The copy stays on your phone until you remove the book from the queue, or until it is sent if Delete after sending is on.</string>
     <string name="settings_version">Version</string>
     <string name="language_system">System default</string>
     <string name="language_italian" translatable="false">Italiano</string>
@@ -64,5 +69,9 @@
     <plurals name="queue_total">
         <item quantity="one">%1$d book</item>
         <item quantity="other">%1$d books</item>
+    </plurals>
+    <plurals name="settings_storage_value">
+        <item quantity="one">%2$s, %1$d book</item>
+        <item quantity="other">%2$s, %1$d books</item>
     </plurals>
 </resources>

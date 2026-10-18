@@ -1,6 +1,7 @@
 package dev.kosend
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Handler
 import android.os.Looper
 import org.json.JSONArray
@@ -53,23 +54,36 @@ object BookStore {
     private val listeners = CopyOnWriteArrayList<() -> Unit>()
     private val main = Handler(Looper.getMainLooper())
     private lateinit var dbFile: File
+    private lateinit var prefs: SharedPreferences
     lateinit var booksDir: File
         private set
+
+    var deleteAfterSend: Boolean
+        get() = prefs.getBoolean("delete_after_send", false)
+        set(value) = prefs.edit().putBoolean("delete_after_send", value).apply()
 
     @Synchronized
     fun init(context: Context) {
         if (::dbFile.isInitialized) return
         dbFile = File(context.filesDir, "queue.json")
+        prefs = context.getSharedPreferences("kosend", Context.MODE_PRIVATE)
         booksDir = File(context.filesDir, "books").apply { mkdirs() }
-        if (dbFile.exists()) {
-            runCatching {
-                val arr = JSONArray(dbFile.readText())
-                for (i in 0 until arr.length()) {
-                    val b = Book.fromJson(arr.getJSONObject(i))
-                    if (File(b.path).exists()) books.add(b)
-                }
+        val loaded = !dbFile.exists() || runCatching {
+            val arr = JSONArray(dbFile.readText())
+            for (i in 0 until arr.length()) {
+                val b = Book.fromJson(arr.getJSONObject(i))
+                if (b.status == BookStatus.SENT || File(b.path).exists()) books.add(b)
             }
+        }.isSuccess
+        if (loaded) {
+            val known = books.map { File(it.path).name }.toSet()
+            booksDir.listFiles()?.filter { it.name !in known }?.forEach { it.delete() }
         }
+    }
+
+    fun storageUsed(): Pair<Long, Int> {
+        val files = booksDir.listFiles().orEmpty()
+        return files.sumOf { it.length() } to files.size
     }
 
     @Synchronized
@@ -88,6 +102,7 @@ object BookStore {
     fun update(id: String, status: BookStatus, message: String = "", progress: Int = 0) {
         val b = books.find { it.id == id } ?: return
         b.status = status; b.message = message; b.progress = progress
+        if (status == BookStatus.SENT && deleteAfterSend) File(b.path).delete()
         if (status != BookStatus.SENDING) save()
         notifyChanged()
     }

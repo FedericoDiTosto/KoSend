@@ -46,6 +46,11 @@
     <string name="settings_section_general">Generali</string>
     <string name="settings_section_about">Informazioni</string>
     <string name="settings_language">Lingua</string>
+    <string name="settings_section_storage">Spazio</string>
+    <string name="settings_storage_used">Spazio occupato</string>
+    <string name="settings_delete_after_send">Elimina dopo l’invio</string>
+    <string name="settings_delete_after_send_detail">Libera spazio appena KOReader ha ricevuto il libro. Resta nella lista come inviato, ma non si può più rimandare.</string>
+    <string name="settings_storage_note">KoSend conserva una copia di ogni libro che aggiungi e non tocca mai il file originale. La copia resta sul telefono finché non togli il libro dalla coda, oppure fino all’invio se Elimina dopo l’invio è attivo.</string>
     <string name="settings_version">Versione</string>
     <string name="language_system">Lingua del sistema</string>
 
@@ -60,5 +65,9 @@
     <plurals name="queue_total">
         <item quantity="one">%1$d libro</item>
         <item quantity="other">%1$d libri</item>
+    </plurals>
+    <plurals name="settings_storage_value">
+        <item quantity="one">%2$s, %1$d libro</item>
+        <item quantity="other">%2$s, %1$d libri</item>
     </plurals>
 </resources>
