@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.1 (2026-10-19)
+
+- Settings show how much space the book copies take, and explain that KoSend keeps a copy until the book is removed.
+- New option: delete a book's copy right after it is sent.
+- Copies left behind by an interrupted import are cleaned up at startup.
+
 ## v1.0.0 (2026-10-17)
 
 First release.
