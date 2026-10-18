@@ -72,6 +72,8 @@ class ReadmeScreenshots {
         val view = paparazzi.inflate<View>(R.layout.activity_settings)
         view.findViewById<android.widget.TextView>(R.id.language_value).setText(R.string.language_system)
         view.findViewById<android.widget.TextView>(R.id.version_value).text = BuildConfig.VERSION_NAME
+        view.findViewById<android.widget.TextView>(R.id.storage_value).text = paparazzi.context.resources
+            .getQuantityString(R.plurals.settings_storage_value, 3, 3, formatSize(paparazzi.context, 11_330_000))
         paparazzi.snapshot(view)
     }
 
