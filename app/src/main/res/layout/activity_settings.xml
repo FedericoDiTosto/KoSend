@@ -154,22 +154,59 @@
                 app:cardCornerRadius="24dp">
 
                 <LinearLayout
-                    style="@style/SettingsRow"
-                    android:background="@null">
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
-                    <ImageView
-                        style="@style/SettingsRowIcon"
-                        android:src="@drawable/ic_info" />
+                    <LinearLayout
+                        style="@style/SettingsRow"
+                        android:background="@null">
 
-                    <LinearLayout style="@style/SettingsRowText">
+                        <ImageView
+                            style="@style/SettingsRowIcon"
+                            android:src="@drawable/ic_info" />
 
-                        <TextView
-                            style="@style/SettingsRowTitle"
-                            android:text="@string/settings_version" />
+                        <LinearLayout style="@style/SettingsRowText">
 
-                        <TextView
-                            android:id="@+id/version_value"
-                            style="@style/SettingsRowValue" />
+                            <TextView
+                                style="@style/SettingsRowTitle"
+                                android:text="@string/settings_version" />
+
+                            <TextView
+                                android:id="@+id/version_value"
+                                style="@style/SettingsRowValue" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/update_row"
+                        style="@style/SettingsRow">
+
+                        <ImageView
+                            style="@style/SettingsRowIcon"
+                            android:src="@drawable/ic_refresh" />
+
+                        <LinearLayout style="@style/SettingsRowText">
+
+                            <TextView
+                                style="@style/SettingsRowTitle"
+                                android:text="@string/settings_check_updates" />
+
+                            <TextView
+                                android:id="@+id/update_value"
+                                style="@style/SettingsRowValue"
+                                android:text="@string/update_idle" />
+                        </LinearLayout>
+
+                        <com.google.android.material.progressindicator.CircularProgressIndicator
+                            android:id="@+id/update_progress"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:indeterminate="true"
+                            android:visibility="gone"
+                            app:indicatorSize="22dp"
+                            app:trackThickness="3dp" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

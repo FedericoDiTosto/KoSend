@@ -54,6 +54,12 @@
     <string name="settings_delete_after_send_detail">Free up space as soon as KOReader has the book. It stays in the list as sent, but can’t be sent again.</string>
     <string name="settings_storage_note">KoSend keeps its own copy of every book you add and never touches the original file. The copy stays on your phone until you remove the book from the queue, or until it is sent if Delete after sending is on.</string>
     <string name="settings_version">Version</string>
+    <string name="settings_check_updates">Check for updates</string>
+    <string name="update_idle">See if a newer version is on GitHub</string>
+    <string name="update_checking">Checking…</string>
+    <string name="update_latest">You have the latest version (%1$s)</string>
+    <string name="update_available">Version %1$s is available: opening GitHub</string>
+    <string name="update_failed">Couldn’t reach GitHub. Check your connection and try again.</string>
     <string name="language_system">System default</string>
     <string name="language_italian" translatable="false">Italiano</string>
     <string name="language_english" translatable="false">English</string>

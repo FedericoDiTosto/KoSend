@@ -52,6 +52,12 @@
     <string name="settings_delete_after_send_detail">Libera spazio appena KOReader ha ricevuto il libro. Resta nella lista come inviato, ma non si può più rimandare.</string>
     <string name="settings_storage_note">KoSend conserva una copia di ogni libro che aggiungi e non tocca mai il file originale. La copia resta sul telefono finché non togli il libro dalla coda, oppure fino all’invio se Elimina dopo l’invio è attivo.</string>
     <string name="settings_version">Versione</string>
+    <string name="settings_check_updates">Controlla aggiornamenti</string>
+    <string name="update_idle">Verifica se su GitHub c’è una versione più recente</string>
+    <string name="update_checking">Controllo in corso…</string>
+    <string name="update_latest">Hai l’ultima versione (%1$s)</string>
+    <string name="update_available">È disponibile la versione %1$s: apro GitHub</string>
+    <string name="update_failed">GitHub non è raggiungibile. Controlla la connessione e riprova.</string>
     <string name="language_system">Lingua del sistema</string>
 
     <plurals name="toast_added">
