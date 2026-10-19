@@ -2,26 +2,26 @@
 <resources>
     <string name="app_name" translatable="false">KoSend</string>
     <string name="tagline">Books from your phone to KOReader</string>
-    <string name="share_label">Send to Kindle</string>
+    <string name="share_label">Send to e-reader</string>
 
     <string name="server_switch">Server on</string>
-    <string name="disconnect">Disconnect Kindle</string>
+    <string name="disconnect">Disconnect e-reader</string>
     <string name="add_books">Add books</string>
 
     <string name="status_off_title">Server off</string>
-    <string name="status_off_detail">Turn it on to make your phone visible to the Kindle.</string>
-    <string name="status_waiting_title">Waiting for the Kindle</string>
+    <string name="status_off_detail">Turn it on to make your phone visible to your e-reader.</string>
+    <string name="status_waiting_title">Waiting for the e-reader</string>
     <string name="status_waiting_detail">Visible on the network as %1$s</string>
     <string name="status_waiting_detail_noip">Visible on the network on port %1$d</string>
-    <string name="status_connected_title">Kindle connected</string>
+    <string name="status_connected_title">E-reader connected</string>
     <string name="status_error_title">The server could not start</string>
 
-    <string name="info_title">How to connect your Kindle</string>
+    <string name="info_title">How to connect your e-reader</string>
     <string name="info_step1">Turn the server on with the switch above and keep KoSend open while sending.</string>
-    <string name="info_step2">On the Kindle, open KOReader and tap the top edge of the screen to show the menu. Open the wrench tab, choose Calibre, then Connect.</string>
+    <string name="info_step2">On your Kindle, Kobo or other e-reader, open KOReader and tap the top edge of the screen to show the menu. Open the wrench tab, choose Calibre, then Connect.</string>
     <string name="info_step3">The first time, KOReader asks which folder to save books in. Then it finds your phone and receives the queued books one after another. Books you add while connected are sent right away.</string>
-    <string name="info_note_ip">Your phone and Kindle must be on the same Wi-Fi network. If the Kindle can’t find your phone, in KOReader open Calibre, then Wireless settings, and set Server address to Manual: IP %1$s, port %2$d.</string>
-    <string name="info_note_noip">Your phone and Kindle must be on the same Wi-Fi network. If the Kindle can’t find your phone, you can enter the address manually in KOReader under Calibre, Wireless settings: it appears here while the server is on.</string>
+    <string name="info_note_ip">Your phone and e-reader must be on the same Wi-Fi network. If the e-reader can’t find your phone, in KOReader open Calibre, then Wireless settings, and set Server address to Manual: IP %1$s, port %2$d.</string>
+    <string name="info_note_noip">Your phone and e-reader must be on the same Wi-Fi network. If the e-reader can’t find your phone, you can enter the address manually in KOReader under Calibre, Wireless settings: it appears here while the server is on.</string>
 
     <string name="queue">Queue</string>
     <string name="clear_sent">Clear sent</string>
@@ -48,7 +48,7 @@
     <string name="show_less">Show less</string>
     <string name="close">Close</string>
     <string name="detail_sent_to">Sent to %1$s</string>
-    <string name="detail_pending">It will be sent the next time the Kindle connects.</string>
+    <string name="detail_pending">It will be sent the next time the e-reader connects.</string>
     <string name="detail_sending">KOReader is receiving the book.</string>
     <string name="detail_error">The book\'s copy is kept: you can send it again.</string>
     <string name="detail_sent_deleted">The copy was deleted after sending, so it can’t be sent again.</string>

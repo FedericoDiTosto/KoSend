@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="tagline">Libri dal telefono a KOReader</string>
-    <string name="share_label">Invia al Kindle</string>
+    <string name="share_label">Invia all’e-reader</string>
 
     <string name="server_switch">Server attivo</string>
-    <string name="disconnect">Disconnetti il Kindle</string>
+    <string name="disconnect">Disconnetti l’e-reader</string>
     <string name="add_books">Aggiungi libri</string>
 
     <string name="status_off_title">Server spento</string>
-    <string name="status_off_detail">Attivalo per rendere il telefono visibile al Kindle.</string>
-    <string name="status_waiting_title">In attesa del Kindle</string>
+    <string name="status_off_detail">Attivalo per rendere il telefono visibile all’e-reader.</string>
+    <string name="status_waiting_title">In attesa dell’e-reader</string>
     <string name="status_waiting_detail">Visibile in rete come %1$s</string>
     <string name="status_waiting_detail_noip">Visibile in rete sulla porta %1$d</string>
-    <string name="status_connected_title">Kindle collegato</string>
+    <string name="status_connected_title">E-reader collegato</string>
     <string name="status_error_title">Il server non è partito</string>
 
-    <string name="info_title">Come collegare il Kindle</string>
+    <string name="info_title">Come collegare l’e-reader</string>
     <string name="info_step1">Attiva il server con l’interruttore qui sopra e tieni KoSend aperta mentre invii.</string>
-    <string name="info_step2">Sul Kindle apri KOReader e tocca il bordo in alto dello schermo per aprire il menu. Apri la scheda con la chiave inglese, scegli Calibre e poi Connetti.</string>
+    <string name="info_step2">Sul Kindle, Kobo o altro e-reader apri KOReader e tocca il bordo in alto dello schermo per aprire il menu. Apri la scheda con la chiave inglese, scegli Calibre e poi Connetti.</string>
     <string name="info_step3">La prima volta KOReader chiede in quale cartella salvare i libri. Poi trova il telefono da solo e riceve i libri in coda, uno dopo l’altro. Quelli che aggiungi durante il collegamento partono subito.</string>
-    <string name="info_note_ip">Telefono e Kindle devono essere sulla stessa rete Wi-Fi. Se il Kindle non trova il telefono, in KOReader apri Calibre, poi Impostazioni Wi-Fi, e imposta Indirizzo del server su Manuale: IP %1$s, porta %2$d.</string>
-    <string name="info_note_noip">Telefono e Kindle devono essere sulla stessa rete Wi-Fi. Se il Kindle non trova il telefono, puoi inserire l’indirizzo a mano in KOReader, in Calibre, Impostazioni Wi-Fi: lo trovi qui quando il server è attivo.</string>
+    <string name="info_note_ip">Telefono ed e-reader devono essere sulla stessa rete Wi-Fi. Se l’e-reader non trova il telefono, in KOReader apri Calibre, poi Impostazioni Wi-Fi, e imposta Indirizzo del server su Manuale: IP %1$s, porta %2$d.</string>
+    <string name="info_note_noip">Telefono ed e-reader devono essere sulla stessa rete Wi-Fi. Se l’e-reader non trova il telefono, puoi inserire l’indirizzo a mano in KOReader, in Calibre, Impostazioni Wi-Fi: lo trovi qui quando il server è attivo.</string>
 
     <string name="queue">Coda</string>
     <string name="clear_sent">Rimuovi inviati</string>
@@ -47,7 +47,7 @@
     <string name="show_less">Mostra meno</string>
     <string name="close">Chiudi</string>
     <string name="detail_sent_to">Inviato a %1$s</string>
-    <string name="detail_pending">Partirà la prossima volta che il Kindle si collega.</string>
+    <string name="detail_pending">Partirà la prossima volta che l’e-reader si collega.</string>
     <string name="detail_sending">KOReader sta ricevendo il libro.</string>
     <string name="detail_error">La copia del libro è conservata: puoi inviarlo di nuovo.</string>
     <string name="detail_sent_deleted">La copia è stata eliminata dopo l’invio, quindi non si può rimandare.</string>

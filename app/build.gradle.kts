@@ -71,14 +71,3 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-process:2.8.7")
     implementation("com.google.android.material:material:1.12.0")
 }
-
-tasks.register<Copy>("screenshots") {
-    group = "documentation"
-    description = "Renders the README screenshots into docs/screenshots."
-    dependsOn("recordPaparazziDebug")
-    from("src/test/snapshots/images") {
-        include("dev.kosend_ReadmeScreenshots_*.png")
-        rename { it.removePrefix("dev.kosend_ReadmeScreenshots_") }
-    }
-    into(rootProject.file("docs/screenshots"))
-}

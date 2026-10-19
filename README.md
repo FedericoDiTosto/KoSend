@@ -1,23 +1,24 @@
 <p align="center">
-  <img src="docs/banner.png" alt="KoSend: send books from your phone to KOReader on your Kindle" width="100%">
+  <img src="docs/banner.png" alt="KoSend: send books from your phone to KOReader on your e-reader" width="100%">
 </p>
 
 # KoSend
 
-**Your phone is now the fastest way to put a book on your Kindle.**
+**Your phone is now the fastest way to put a book on your e-reader.**
 
 KoSend is a small Android app that sends EPUB, PDF and MOBI files straight to
-[KOReader](https://koreader.rocks) on a jailbroken Kindle, over Wi-Fi.
+[KOReader](https://koreader.rocks) over Wi-Fi: on a jailbroken Kindle, on a Kobo,
+or on any other e-reader that runs KOReader.
 No computer to turn on, no USB cable, no calibre library to maintain:
-queue the books on your phone, tap **Connect** on the Kindle, and they arrive.
+queue the books on your phone, tap **Connect** on the e-reader, and they arrive.
 
 It works with the wireless client KOReader already ships with, so there is
-nothing to install on the Kindle.
+nothing to install on the e-reader.
 
 ## Features
 
-- **One tap on the Kindle.** KOReader finds your phone on the network by itself.
-- **A queue, not a chore.** Add books whenever you find them; they are sent the next time the Kindle connects.
+- **One tap on the e-reader.** KOReader finds your phone on the network by itself.
+- **A queue, not a chore.** Add books whenever you find them; they are sent the next time the e-reader connects.
 - **Your queue, your order.** Drag books to choose what goes first, swipe one left to reveal Remove (with Undo), retry a failed transfer with one tap.
 - **Share from anywhere.** Browser downloads, file managers, Telegram, email: share a file and pick KoSend.
 - **Real titles and covers.** Title, author and cover are read from EPUB, MOBI/AZW3 and PDF files, so books show up properly in KOReader's calibre search.
@@ -34,30 +35,35 @@ nothing to install on the Kindle.
 
 1. **Add your books** with the button, or share them to KoSend from any app.
 2. **Turn on the server** with the switch. Keep KoSend open.
-3. **On the Kindle**, open KOReader and tap the top edge of the screen to show the menu.
+3. **On the e-reader**, open KOReader and tap the top edge of the screen to show the menu.
    Open the **wrench** tab (Tools), choose **Calibre**, then tap **Connect**.
    The first time, KOReader asks which folder to save the books in.
 4. **Done.** KOReader finds your phone on its own and the queue is sent one book after another.
-   Books you add while the Kindle is connected go out right away.
+   Books you add while the e-reader is connected go out right away.
 
 To disconnect, open the same menu again: *Connect* has become *Disconnect*. You can also tap
-*Disconnect Kindle* in KoSend.
+*Disconnect e-reader* in KoSend.
 
 ## Screenshots
 
-| Queue | Waiting for the Kindle | Sending |
+| Queue | Book details | Swipe to remove |
 |:---:|:---:|:---:|
-| <img src="docs/screenshots/step2_queue.png" width="260"> | <img src="docs/screenshots/step3_waiting.png" width="260"> | <img src="docs/screenshots/step4_sending.png" width="260"> |
+| <img src="docs/screenshots/queue.png" width="260"> | <img src="docs/screenshots/detail.png" width="260"> | <img src="docs/screenshots/swipe.png" width="260"> |
 
-| Empty queue | Dark theme | Settings |
+| Waiting for the e-reader | Sending | Settings |
 |:---:|:---:|:---:|
-| <img src="docs/screenshots/step1_empty.png" width="260"> | <img src="docs/screenshots/step5_dark.png" width="260"> | <img src="docs/screenshots/step6_settings.png" width="260"> |
+| <img src="docs/screenshots/waiting.png" width="260"> | <img src="docs/screenshots/sending.png" width="260"> | <img src="docs/screenshots/settings.png" width="260"> |
+
+Taken on a real phone, sending to a Kindle running KOReader. The books are free public domain
+editions from [Standard Ebooks](https://standardebooks.org); covers and details are the ones
+KoSend reads from the EPUB files.
 
 ## Requirements
 
 - An Android phone running Android 8.0 or later.
-- A Kindle with [KOReader](https://koreader.rocks) installed. The calibre plugin is included in KOReader.
-- Phone and Kindle on the **same Wi-Fi network**.
+- An e-reader with [KOReader](https://koreader.rocks) installed: a Kindle, a Kobo, or any other device KOReader runs on.
+  The calibre plugin is included in KOReader.
+- Phone and e-reader on the **same Wi-Fi network**.
 
 ## Install
 
@@ -76,7 +82,7 @@ You can check it with `apksigner verify --print-certs KoSend.apk`.
 
 ## Troubleshooting
 
-**The Kindle can't find the phone.**
+**The e-reader can't find the phone.**
 Some networks block the broadcast KOReader uses to look for calibre: guest networks,
 mesh systems and routers with "client isolation" or "AP isolation". You can skip the
 search: in KOReader open the wrench tab, then *Calibre*, *Wireless settings*, and set
@@ -105,7 +111,7 @@ implements the server side of that protocol, just the part KOReader needs:
    confirms that KOReader has written everything.
 
 **KoSend is not a calibre replacement.** It has no library, doesn't edit metadata,
-doesn't convert formats and doesn't read books back from the Kindle. It does one
+doesn't convert formats and doesn't read books back from the e-reader. It does one
 thing: deliver files from your phone to KOReader.
 
 The reference is KOReader's own client,
@@ -137,16 +143,6 @@ keyAlias=kosend
 keyPassword=...
 ```
 
-To regenerate the screenshots in this README:
-
-```sh
-./gradlew screenshots
-```
-
-They are rendered from the app's layouts on the JVM, with no device or emulator,
-using [Paparazzi](https://github.com/cashapp/paparazzi). The screens and sample data
-are defined in `app/src/test/java/dev/kosend/ReadmeScreenshots.kt`.
-
 Project layout:
 
 ```
@@ -155,10 +151,16 @@ app/src/main/java/dev/kosend/
   ServerController.kt  starts and stops the server
   KoSendApp.kt         stops the server when the app goes to the background
   BookStore.kt         the queue, saved on the phone
-  BookMeta.kt          title and author from EPUB files
+  BookMeta.kt          title, author, details and cover from EPUB, MOBI/AZW3 and PDF
+  CoverCache.kt        cover thumbnails, decoded in the background
+  CoverView.kt         a book's cover, or a placeholder when it has none
   MainActivity.kt      main screen and file import
   QueueAdapter.kt      status card, help box and book list
-  SettingsActivity.kt  language and version
+  QueueGestures.kt     drag to reorder
+  SwipeToRemove.kt     swipe a book left to reveal Remove
+  BookDetail.kt        the book detail page
+  UpdateChecker.kt     asks GitHub for the latest release
+  SettingsActivity.kt  language, storage, version and updates
 design/                logo and README artwork (VectorCraft sources)
 docs/                  images used by this README
 ```
@@ -178,5 +180,5 @@ Built on the work of the [KOReader](https://github.com/koreader/koreader) team a
 wireless device protocol designed by [calibre](https://calibre-ebook.com).
 Icons from [Material Symbols](https://fonts.google.com/icons).
 
-KoSend is an independent project, not affiliated with Amazon, calibre or KOReader.
-Kindle is a trademark of Amazon.com, Inc.
+KoSend is an independent project, not affiliated with Amazon, Rakuten Kobo, calibre or KOReader.
+Kindle is a trademark of Amazon.com, Inc. Kobo is a trademark of Rakuten Kobo Inc.

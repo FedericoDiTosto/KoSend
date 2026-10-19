@@ -5,12 +5,12 @@
 ## How it was tested
 
 - Phone and Android version:
-- Kindle model and KOReader version:
+- E-reader model and KOReader version:
 - What you tried:
 
 ## Checklist
 
 - [ ] Builds with `./build.sh debug`
-- [ ] Tested on a real phone with a Kindle running KOReader
+- [ ] Tested on a real phone with an e-reader running KOReader
 - [ ] New user-facing text is in `strings.xml`
 - [ ] Screenshots regenerated with `./gradlew screenshots` if the UI changed

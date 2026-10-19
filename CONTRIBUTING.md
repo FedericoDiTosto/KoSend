@@ -7,9 +7,9 @@ Thanks for your interest in KoSend. Bug reports, translations and code changes a
 Open an issue with the **Bug report** form. The most useful details are:
 
 - your phone model and Android version
-- your Kindle model, firmware and KOReader version
-- whether the Kindle finds the phone on its own or only with a manual address
-- the lines mentioning `calibre` in `koreader/crash.log` on the Kindle
+- your e-reader (Kindle, Kobo, ...), its model, firmware and KOReader version
+- whether the e-reader finds the phone on its own or only with a manual address
+- the lines mentioning `calibre` in `koreader/crash.log` on the e-reader
 
 For security problems, please use **Report a vulnerability** in the Security tab instead of a public issue.
 
@@ -20,7 +20,7 @@ before you spend time on it.
 
 1. Fork the repository and create a branch from `main`.
 2. Make your change. Keep each pull request focused on one thing.
-3. Build it and try it on a real phone with a Kindle running KOReader.
+3. Build it and try it on a real phone with an e-reader running KOReader.
 4. Open a pull request against `main` and fill in the template.
 
 ## Building
@@ -36,7 +36,6 @@ Then:
 
 ```sh
 ./build.sh debug       # debug APK in dist/
-./gradlew screenshots  # regenerate the README screenshots
 ```
 
 Release builds are signed by the maintainer; you don't need a signing key to contribute.
@@ -46,7 +45,7 @@ Release builds are signed by the maintainer; you don't need a signing key to con
 - Kotlin, following the [official style](https://kotlinlang.org/docs/coding-conventions.html).
 - Match the code around your change: naming, structure and comment density.
 - All user-facing text goes in `app/src/main/res/values/strings.xml`, never hard-coded.
-- If your change affects the UI, run `./gradlew screenshots` and include the updated images.
+- If your change affects the UI, attach a screenshot from a real phone to the pull request.
 
 ## Translations
 
@@ -56,7 +55,7 @@ translate the values, keep the `name` attributes and placeholders such as `%1$s`
 and add the language to `AppLanguage.kt`.
 
 For KOReader menu names, use KOReader's own translation for your language so the
-instructions match what users see on the Kindle.
+instructions match what users see on the e-reader.
 
 ## License
 
