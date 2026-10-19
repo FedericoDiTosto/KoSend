@@ -34,14 +34,40 @@
     <string name="book_error">Error</string>
 
     <string name="action_retry">Send again</string>
-    <string name="action_remove">Remove from queue</string>
+    <string name="action_retry_short">Retry</string>
+    <string name="action_remove_short">Remove</string>
+    <string name="drag_to_reorder">Drag to reorder</string>
+    <string name="snackbar_removed">Removed “%1$s”</string>
+    <string name="undo">Undo</string>
+
+    <string name="meta_description">Description</string>
+    <string name="meta_publication">Publication</string>
+    <string name="meta_file">File</string>
+    <string name="meta_series">%1$s, book %2$s</string>
+    <string name="show_more">Show more</string>
+    <string name="show_less">Show less</string>
+    <string name="close">Close</string>
+    <string name="detail_sent_to">Sent to %1$s</string>
+    <string name="detail_pending">It will be sent the next time the Kindle connects.</string>
+    <string name="detail_sending">KOReader is receiving the book.</string>
+    <string name="detail_error">The book\'s copy is kept: you can send it again.</string>
+    <string name="detail_sent_deleted">The copy was deleted after sending, so it can’t be sent again.</string>
+    <string name="meta_publisher">Publisher</string>
+    <string name="meta_published">Published</string>
+    <string name="meta_language">Language</string>
+    <string name="meta_isbn">ISBN</string>
+    <string name="meta_subjects">Subjects</string>
+    <string name="meta_format">Format</string>
+    <string name="meta_size">Size</string>
+    <string name="meta_file_name">File name</string>
+    <string name="meta_added">Added</string>
 
     <string name="toast_skipped">Unsupported format: %1$s</string>
 
     <string name="error_no_port">No free port between 9090 and 9099</string>
     <string name="error_missing_file">File not found</string>
     <string name="error_rejected">Rejected by KOReader</string>
-    <string name="error_unsupported">KOReader doesn’t accept .%1$s files</string>
+    <string name="error_unsupported">KOReader doesn\'t accept .%1$s files</string>
     <string name="settings_title">Settings</string>
     <string name="settings_open">Open settings</string>
     <string name="back">Back</string>

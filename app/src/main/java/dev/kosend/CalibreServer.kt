@@ -231,16 +231,18 @@ class CalibreServer(
         }
 
         private fun sendPendingBooks() {
-            val books = BookStore.pending()
-            books.forEachIndexed { i, book ->
+            var i = 0
+            while (running) {
+                val book = BookStore.nextPending() ?: break
+                val total = i + BookStore.pendingCount()
                 if (accepted.isNotEmpty() && book.extension !in accepted) {
                     BookStore.update(book.id, BookStatus.ERROR, Messages.unsupported(book.extension))
-                    return@forEachIndexed
+                    continue
                 }
                 val file = File(book.path)
                 if (!file.exists()) {
                     BookStore.update(book.id, BookStatus.ERROR, Messages.MISSING_FILE)
-                    return@forEachIndexed
+                    continue
                 }
                 BookStore.update(book.id, BookStatus.SENDING)
                 val length = file.length()
@@ -248,7 +250,7 @@ class CalibreServer(
                     .put("lpath", book.fileName)
                     .put("length", length)
                     .put("thisBook", i)
-                    .put("totalBooks", books.size)
+                    .put("totalBooks", total)
                     .put("willStreamBooks", true)
                     .put("willStreamBinary", true)
                     .put("wantsSendOkToSendbook", true)
@@ -257,7 +259,7 @@ class CalibreServer(
                 val (op, reply) = receive()
                 if (op == ERROR) {
                     BookStore.update(book.id, BookStatus.ERROR, reply.optString("message").ifEmpty { Messages.REJECTED })
-                    return@forEachIndexed
+                    continue
                 }
                 if (op != OK) throw IOException("unexpected reply to SEND_BOOK: $op")
 
@@ -282,6 +284,7 @@ class CalibreServer(
                 send(NOOP, JSONObject())
                 expectOk()
                 BookStore.update(book.id, BookStatus.SENT, deviceName)
+                i++
             }
         }
 

@@ -17,15 +17,20 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import java.io.File
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
     private lateinit var adapter: QueueAdapter
+    private lateinit var list: RecyclerView
+    private lateinit var fab: ExtendedFloatingActionButton
+    private var dragging = false
+    private lateinit var swipe: SwipeToRemove
     private val io = Executors.newSingleThreadExecutor()
 
     private val storeListener = { refresh() }
@@ -52,13 +57,18 @@ class MainActivity : AppCompatActivity() {
             onInfoToggled = { expanded -> prefs.edit().putBoolean("info_expanded", expanded).apply() },
             onBookTapped = ::onBookTapped,
             onOpenSettings = { startActivity(Intent(this, SettingsActivity::class.java)) },
+            onRetry = ::sendAgain,
+            onStartDrag = { swipe.close(); touchHelper.startDrag(it) },
+            onBindBook = { holder, book -> swipe.bind(holder, book) },
         )
-        val list = findViewById<RecyclerView>(R.id.list)
+        list = findViewById(R.id.list)
         list.layoutManager = LinearLayoutManager(this)
         list.adapter = adapter
         list.itemAnimator?.changeDuration = 0
+        touchHelper.attachToRecyclerView(list)
+        swipe = SwipeToRemove(list, adapter, isDragging = { dragging }, onRemove = ::removeWithUndo)
 
-        val fab = findViewById<ExtendedFloatingActionButton>(R.id.add)
+        fab = findViewById(R.id.add)
         fab.setOnClickListener {
             ServerController.pickerOpen = true
             pickBooks.launch(arrayOf("*/*"))
@@ -81,6 +91,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (savedInstanceState == null) handleIncoming(intent)
+        readOutdatedMeta()
+    }
+
+    private val touchHelper by lazy {
+        ItemTouchHelper(QueueGestures(
+            adapter,
+            onDragging = { dragging = it },
+            onDropped = { ids -> BookStore.reorder(ids); refresh() },
+        ))
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -102,8 +121,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun refresh() {
+        if (dragging) return
         val state = ServerController.state
-        adapter.update(BookStore.all().asReversed(), state, ServerController.localIp(this))
+        adapter.update(BookStore.all(), state, ServerController.localIp(this))
 
         if (state is CalibreServer.State.Stopped) window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         else window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -134,16 +154,26 @@ class MainActivity : AppCompatActivity() {
                 val id = BookStore.newId()
                 val dest = File(BookStore.booksDir, "$id.$ext")
                 val ok = runCatching {
-                    contentResolver.openInputStream(uri)!!.use { inp -> dest.outputStream().use { inp.copyTo(it) } }
+                    contentResolver.openInputStream(uri)!!.use { inp ->
+                        java.io.FileOutputStream(dest).use { out ->
+                            inp.copyTo(out)
+                            out.fd.sync()
+                        }
+                    }
                 }.isSuccess
                 if (!ok) { dest.delete(); skipped.add(name); continue }
-                val (title, authors) = BookMeta.read(dest, name)
-                BookStore.add(Book(id, safeFileName(name), dest.path, dest.length(), title, authors))
+                val meta = BookMeta.read(dest, name)
+                val cover = meta.cover?.let { BookStore.saveCover(id, it) }
+                BookStore.add(Book(
+                    id, safeFileName(name), dest.path, dest.length(), meta.title, meta.authors,
+                    details = meta.details, cover = cover, addedAt = System.currentTimeMillis(),
+                ))
                 added++
             }
             runOnUiThread {
                 if (added > 0) {
                     ServerController.sendPending()
+                    list.post { list.smoothScrollToPosition(adapter.itemCount - 1) }
                     Toast.makeText(this, resources.getQuantityString(R.plurals.toast_added, added, added), Toast.LENGTH_SHORT).show()
                 }
                 if (skipped.isNotEmpty()) {
@@ -167,20 +197,38 @@ class MainActivity : AppCompatActivity() {
         return cleaned.ifEmpty { "book.epub" }
     }
 
-    private fun onBookTapped(book: Book) {
-        val actions = mutableListOf<Pair<Int, () -> Unit>>()
-        val canResend = book.status == BookStatus.ERROR || book.status == BookStatus.SENT
-        if (canResend && File(book.path).exists()) {
-            actions.add(R.string.action_retry to {
-                BookStore.retry(book.id)
-                ServerController.sendPending()
-            })
+    private fun readOutdatedMeta() {
+        io.execute {
+            for (book in BookStore.outdated()) {
+                val meta = runCatching { BookMeta.read(File(book.path), book.fileName) }.getOrNull() ?: continue
+                val cover = meta.cover?.let { BookStore.saveCover(book.id, it) }
+                BookStore.setMeta(book.id, meta, cover)
+            }
         }
-        if (book.status != BookStatus.SENDING) actions.add(R.string.action_remove to { BookStore.remove(book.id) })
-        if (actions.isEmpty()) return
-        MaterialAlertDialogBuilder(this)
-            .setTitle(book.title)
-            .setItems(actions.map { getString(it.first) }.toTypedArray()) { _, which -> actions[which].second() }
+    }
+
+    private fun onBookTapped(book: Book) {
+        BookDetail.show(this, book.id, onSendAgain = ::sendAgain, onRemove = ::removeWithUndo)
+    }
+
+    private fun sendAgain(book: Book) {
+        BookStore.retry(book.id)
+        ServerController.sendPending()
+    }
+
+    private fun removeWithUndo(book: Book) {
+        val removed = BookStore.remove(book.id) ?: run {
+            adapter.notifyItemChanged(adapter.bookIds().indexOf(book.id) + 1)
+            return
+        }
+        Snackbar.make(findViewById(R.id.root), getString(R.string.snackbar_removed, book.title), Snackbar.LENGTH_LONG)
+            .setAnchorView(fab)
+            .setAction(R.string.undo) { BookStore.restore(removed) }
+            .addCallback(object : Snackbar.Callback() {
+                override fun onDismissed(bar: Snackbar, event: Int) {
+                    if (event != DISMISS_EVENT_ACTION) BookStore.discard(removed)
+                }
+            })
             .show()
     }
 }

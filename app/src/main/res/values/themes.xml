@@ -20,4 +20,17 @@
         <item name="colorError">@color/error</item>
         <item name="android:windowLightStatusBar">@bool/light_bars</item>
     </style>
+
+    <style name="BookDetailDialog" parent="AppTheme">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@style/BookDetailAnimation</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="BookDetailAnimation">
+        <item name="android:windowEnterAnimation">@anim/detail_enter</item>
+        <item name="android:windowExitAnimation">@anim/detail_exit</item>
+    </style>
 </resources>

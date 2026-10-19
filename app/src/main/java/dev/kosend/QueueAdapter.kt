@@ -1,12 +1,15 @@
 package dev.kosend
 
 import android.content.Context
+import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.MaterialColors
@@ -22,22 +25,41 @@ class QueueAdapter(
     private val onInfoToggled: (Boolean) -> Unit,
     private val onBookTapped: (Book) -> Unit,
     private val onOpenSettings: () -> Unit,
+    private val onRetry: (Book) -> Unit = {},
+    private val onStartDrag: (RecyclerView.ViewHolder) -> Unit = {},
+    private val onBindBook: (RecyclerView.ViewHolder, Book) -> Unit = { _, _ -> },
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var books: List<Book> = emptyList()
     private var state: CalibreServer.State = CalibreServer.State.Stopped
     private var ip: String? = null
 
     fun update(books: List<Book>, state: CalibreServer.State, ip: String?) {
-        val sameIds = books.map { it.id } == this.books.map { it.id }
+        val old = this.books
         this.books = books
         this.state = state
         this.ip = ip
-        if (sameIds) {
-            notifyItemChanged(0)
-            if (books.isNotEmpty()) notifyItemRangeChanged(1, books.size)
-        } else {
-            notifyDataSetChanged()
-        }
+        DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+            override fun getOldListSize() = 1 + maxOf(old.size, 1)
+            override fun getNewListSize() = 1 + maxOf(books.size, 1)
+
+            override fun areItemsTheSame(o: Int, n: Int) = when {
+                o == 0 || n == 0 -> o == n
+                old.isEmpty() || books.isEmpty() -> old.isEmpty() && books.isEmpty()
+                else -> old[o - 1].id == books[n - 1].id
+            }
+
+            override fun areContentsTheSame(o: Int, n: Int) = o != 0 && old.getOrNull(o - 1) == books.getOrNull(n - 1)
+        }).dispatchUpdatesTo(this)
+    }
+
+    fun bookAt(position: Int): Book? = if (position > 0) books.getOrNull(position - 1) else null
+
+    fun bookIds(): List<String> = books.map { it.id }
+
+    fun moveItem(from: Int, to: Int) {
+        if (bookAt(from) == null || bookAt(to) == null) return
+        books = books.toMutableList().apply { add(to - 1, removeAt(from - 1)) }
+        notifyItemMoved(from, to)
     }
 
     override fun getItemCount() = 1 + maxOf(books.size, 1)
@@ -158,34 +180,44 @@ class QueueAdapter(
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private inner class BookHolder(v: View) : RecyclerView.ViewHolder(v) {
-        private val badge: TextView = v.findViewById(R.id.badge)
+        private val card: View = v.findViewById(R.id.card)
+        private val cover: CoverView = v.findViewById(R.id.cover)
         private val title: TextView = v.findViewById(R.id.title)
         private val subtitle: TextView = v.findViewById(R.id.subtitle)
         private val statusIcon: ImageView = v.findViewById(R.id.status_icon)
         private val status: TextView = v.findViewById(R.id.status)
+        private val retry: MaterialButton = v.findViewById(R.id.retry)
         private val progress: LinearProgressIndicator = v.findViewById(R.id.progress)
+        private val handle: View = v.findViewById(R.id.drag_handle)
+
+        init {
+            handle.setOnTouchListener { _, e ->
+                if (e.actionMasked == MotionEvent.ACTION_DOWN) onStartDrag(this)
+                false
+            }
+        }
 
         fun bind(b: Book) {
-            itemView.setOnClickListener { onBookTapped(b) }
-            badge.text = b.extension.uppercase().take(4)
-            badge.tint(badgeColor(b.extension))
+            card.setOnClickListener { onBookTapped(b) }
+            onBindBook(this, b)
+            retry.setOnClickListener { onRetry(b) }
             title.text = b.title
-            val size = formatSize(context, b.size)
-            subtitle.text = if (b.authors.isNotEmpty()) "${b.authors.joinToString()}  ·  $size" else size
-
-            val onVariant = MaterialColors.getColor(status, com.google.android.material.R.attr.colorOnSurfaceVariant)
-            val primary = MaterialColors.getColor(status, androidx.appcompat.R.attr.colorPrimary)
-            val (iconRes, color, text) = when (b.status) {
-                BookStatus.PENDING -> Triple(R.drawable.ic_schedule, onVariant, context.getString(R.string.book_pending))
-                BookStatus.SENDING -> Triple(R.drawable.ic_upload, primary, context.getString(R.string.book_sending, b.progress))
-                BookStatus.SENT -> Triple(R.drawable.ic_check_circle, context.getColor(R.color.success), context.getString(R.string.book_sent))
-                BookStatus.ERROR -> Triple(R.drawable.ic_error, context.getColor(R.color.error), b.message.ifEmpty { context.getString(R.string.book_error) }.let { Messages.localize(context, it) })
+            cover.onCoverShown = { shown ->
+               val authors = b.authors.joinToString().ifEmpty { null }
+                subtitle.text = listOfNotNull(authors, b.extension.uppercase().takeIf { shown }, formatSize(context, b.size))
+                    .joinToString("  ·  ")
             }
+            cover.bind(b, 64)
+
+            val (iconRes, color, text) = statusDisplay(context, status, b)
             statusIcon.setImageResource(iconRes)
             statusIcon.imageTintList = ColorStateList.valueOf(color)
             status.setTextColor(color)
             status.text = text
+            retry.visibility = if (b.status == BookStatus.ERROR && b.fileExists) View.VISIBLE else View.GONE
+            handle.visibility = if (b.status == BookStatus.SENDING) View.INVISIBLE else View.VISIBLE
 
             if (b.status == BookStatus.SENDING) {
                 progress.visibility = View.VISIBLE
@@ -200,5 +232,16 @@ class QueueAdapter(
         private const val TYPE_HEADER = 0
         private const val TYPE_BOOK = 1
         private const val TYPE_EMPTY = 2
+    }
+}
+
+internal fun statusDisplay(context: Context, view: View, b: Book): Triple<Int, Int, String> {
+    val onVariant = MaterialColors.getColor(view, com.google.android.material.R.attr.colorOnSurfaceVariant)
+    val primary = MaterialColors.getColor(view, androidx.appcompat.R.attr.colorPrimary)
+    return when (b.status) {
+        BookStatus.PENDING -> Triple(R.drawable.ic_schedule, onVariant, context.getString(R.string.book_pending))
+        BookStatus.SENDING -> Triple(R.drawable.ic_upload, primary, context.getString(R.string.book_sending, b.progress))
+        BookStatus.SENT -> Triple(R.drawable.ic_check_circle, context.getColor(R.color.success), context.getString(R.string.book_sent))
+        BookStatus.ERROR -> Triple(R.drawable.ic_error, context.getColor(R.color.error), b.message.ifEmpty { context.getString(R.string.book_error) }.let { Messages.localize(context, it) })
     }
 }

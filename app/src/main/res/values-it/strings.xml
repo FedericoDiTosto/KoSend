@@ -33,7 +33,33 @@
     <string name="book_error">Errore</string>
 
     <string name="action_retry">Invia di nuovo</string>
-    <string name="action_remove">Rimuovi dalla coda</string>
+    <string name="action_retry_short">Riprova</string>
+    <string name="action_remove_short">Rimuovi</string>
+    <string name="drag_to_reorder">Trascina per riordinare</string>
+    <string name="snackbar_removed">“%1$s” rimosso</string>
+    <string name="undo">Annulla</string>
+
+    <string name="meta_description">Descrizione</string>
+    <string name="meta_publication">Pubblicazione</string>
+    <string name="meta_file">File</string>
+    <string name="meta_series">%1$s, libro %2$s</string>
+    <string name="show_more">Mostra tutto</string>
+    <string name="show_less">Mostra meno</string>
+    <string name="close">Chiudi</string>
+    <string name="detail_sent_to">Inviato a %1$s</string>
+    <string name="detail_pending">Partirà la prossima volta che il Kindle si collega.</string>
+    <string name="detail_sending">KOReader sta ricevendo il libro.</string>
+    <string name="detail_error">La copia del libro è conservata: puoi inviarlo di nuovo.</string>
+    <string name="detail_sent_deleted">La copia è stata eliminata dopo l’invio, quindi non si può rimandare.</string>
+    <string name="meta_publisher">Editore</string>
+    <string name="meta_published">Pubblicato</string>
+    <string name="meta_language">Lingua</string>
+    <string name="meta_isbn">ISBN</string>
+    <string name="meta_subjects">Argomenti</string>
+    <string name="meta_format">Formato</string>
+    <string name="meta_size">Dimensione</string>
+    <string name="meta_file_name">Nome del file</string>
+    <string name="meta_added">Aggiunto</string>
 
     <string name="toast_skipped">Formato non supportato: %1$s</string>
     <string name="error_no_port">Nessuna porta libera tra 9090 e 9099</string>
