@@ -18,9 +18,11 @@ nothing to install on the Kindle.
 
 - **One tap on the Kindle.** KOReader finds your phone on the network by itself.
 - **A queue, not a chore.** Add books whenever you find them; they are sent the next time the Kindle connects.
+- **Your queue, your order.** Drag books to choose what goes first, swipe one left to reveal Remove (with Undo), retry a failed transfer with one tap.
 - **Share from anywhere.** Browser downloads, file managers, Telegram, email: share a file and pick KoSend.
-- **Real titles.** Title and author are read from the EPUB, so books show up properly in KOReader's calibre search.
-- **Private by design.** Everything stays on your local network. No accounts, no cloud, no tracking.
+- **Real titles and covers.** Title, author and cover are read from EPUB, MOBI/AZW3 and PDF files, so books show up properly in KOReader's calibre search.
+- **Book details.** Tap a book to see its cover, series, publisher, language, ISBN, description and more.
+- **Private by design.** Everything stays on your local network. No accounts, no cloud, no tracking. The only request to the internet is *Check for updates* in Settings, and only when you tap it.
 - **Battery friendly.** The server only runs while KoSend is open and switched on.
 - **Light and dark theme**, English and Italian.
 

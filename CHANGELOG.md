@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.0 (2026-10-19)
+
+- Book covers in the queue, read from EPUB, MOBI/AZW3 and PDF files. Books already in the queue get theirs on the next start.
+- Tap a book to see its details: cover, authors, series, publisher, publication date, language, ISBN, subjects, description and file information.
+- Drag books to change the order they are sent in. The list now shows the queue in sending order, top first.
+- Swipe a book to the left to reveal Remove: tap it, or keep swiping, to take the book out of the queue, with Undo.
+- A failed transfer can be retried right from the list; the book's copy is kept.
+- Settings: Check for updates looks for a newer release on GitHub and opens it.
+- Title, author and other details are now read from MOBI and AZW3 files too.
+
 ## v1.0.1 (2026-10-19)
 
 - Settings show how much space the book copies take, and explain that KoSend keeps a copy until the book is removed.
