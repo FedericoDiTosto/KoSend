@@ -32,7 +32,7 @@
     <string name="book_sent">Inviato</string>
     <string name="book_error">Errore</string>
 
-    <string name="action_retry">Invia di nuovo</string>
+    <string name="action_retry">Reinvia</string>
     <string name="action_retry_short">Riprova</string>
     <string name="action_remove_short">Rimuovi</string>
     <string name="drag_to_reorder">Trascina per riordinare</string>
@@ -60,6 +60,42 @@
     <string name="meta_size">Dimensione</string>
     <string name="meta_file_name">Nome del file</string>
     <string name="meta_added">Aggiunto</string>
+
+    <string name="edit_details">Modifica dettagli</string>
+    <string name="edit_title">Modifica dettagli</string>
+    <string name="edit_save">Salva</string>
+    <string name="edit_cover">Copertina</string>
+    <string name="edit_cover_hint">Scegli un’immagine dal telefono</string>
+    <string name="edit_cover_change">Cambia copertina</string>
+    <string name="edit_cover_failed">Impossibile aprire l’immagine</string>
+    <string name="edit_cover_crop">Ritaglia</string>
+    <string name="crop_title">Ritaglia copertina</string>
+    <string name="crop_done">Fatto</string>
+    <string name="crop_rotate">Ruota</string>
+    <string name="crop_free">Libero</string>
+    <string name="crop_original">Originale</string>
+    <string name="crop_book">2:3 libro</string>
+    <string name="crop_kindle">5:8 Kindle</string>
+    <string name="crop_kobo">3:4 Kobo</string>
+    <string name="edit_resend_title">Se il libro è già sull’e-reader</string>
+    <string name="edit_resend_text">Se hai già inviato il libro, KOReader tiene in memoria la copertina precedente.</string>
+    <string name="edit_resend_tip">Se vedi ancora la copertina vecchia, in KOReader tieni premuto sul libro e aggiorna le informazioni in cache.</string>
+    <string name="edit_field_title">Titolo</string>
+    <string name="edit_field_authors">Autori</string>
+    <string name="edit_helper_authors">Separa più autori con una virgola</string>
+    <string name="edit_section_series">Serie</string>
+    <string name="edit_field_series">Nome della serie</string>
+    <string name="edit_field_index">Numero</string>
+    <string name="edit_field_tags">Tag</string>
+    <string name="edit_helper_tags">Separali con una virgola. KOReader li mostra come parole chiave.</string>
+    <string name="edit_tidy">Sistema il titolo</string>
+    <string name="edit_revert">Ripristina i dati del file</string>
+    <string name="edit_error_title">Il titolo non può essere vuoto</string>
+    <string name="edit_error_index">Inserisci un numero, ad esempio 1 o 2,5</string>
+    <string name="edit_note_embed">Quando il libro viene inviato, KoSend scrive questi dati dentro il file, così KOReader mostra titolo, autore e serie giusti. La copia sul telefono resta com’è.</string>
+    <string name="edit_note_plain">I file .%1$s non possono contenere questi dati: KoSend dà al file un nome chiaro e passa la serie ai metadati Calibre di KOReader.</string>
+    <string name="edit_file_name">Sull’e-reader: %1$s</string>
+    <string name="detail_edited">I dati modificati verranno scritti nel file al momento dell’invio.</string>
 
     <string name="toast_skipped">Formato non supportato: %1$s</string>
     <string name="error_no_port">Nessuna porta libera tra 9090 e 9099</string>
