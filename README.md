@@ -23,6 +23,8 @@ nothing to install on the e-reader.
 - **Share from anywhere.** Browser downloads, file managers, Telegram, email: share a file and pick KoSend.
 - **Real titles and covers.** Title, author and cover are read from EPUB, MOBI/AZW3 and PDF files, so books show up properly in KOReader's calibre search.
 - **Book details.** Tap a book to see its cover, series, publisher, language, ISBN, description and more.
+- **Fix messy books from your phone.** Downloaded files sometimes arrive with wrong details or with no series at all. Edit the title and authors, set the series and its number, add tags: KoSend writes them into the book right before sending it, so your KOReader library sorts and groups itself. Works with EPUB, MOBI/AZW3, FB2 and PDF; other formats get a clean file name.
+- **Your cover, cropped right.** Pick an image from your phone and crop it to 2:3, 5:8 for Kindle, 3:4 for Kobo, square or free. It goes inside the EPUB, MOBI/AZW3 or FB2 file, so KOReader shows it everywhere.
 - **Private by design.** Everything stays on your local network. No accounts, no cloud, no tracking. The only request to the internet is *Check for updates* in Settings, and only when you tap it.
 - **Battery friendly.** The server only runs while KoSend is open and switched on.
 - **Light and dark theme**, English and Italian.
@@ -50,9 +52,13 @@ To disconnect, open the same menu again: *Connect* has become *Disconnect*. You 
 |:---:|:---:|:---:|
 | <img src="docs/screenshots/queue.png" width="260"> | <img src="docs/screenshots/detail.png" width="260"> | <img src="docs/screenshots/swipe.png" width="260"> |
 
-| Waiting for the e-reader | Sending | Settings |
+| Edit details | Crop the cover | Waiting for the e-reader |
 |:---:|:---:|:---:|
-| <img src="docs/screenshots/waiting.png" width="260"> | <img src="docs/screenshots/sending.png" width="260"> | <img src="docs/screenshots/settings.png" width="260"> |
+| <img src="docs/screenshots/edit.png" width="260"> | <img src="docs/screenshots/crop.png" width="260"> | <img src="docs/screenshots/waiting.png" width="260"> |
+
+| Sending | Settings | |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/sending.png" width="260"> | <img src="docs/screenshots/settings.png" width="260"> | |
 
 Taken on a real phone, sending to a Kindle running KOReader. The books are free public domain
 editions from [Standard Ebooks](https://standardebooks.org); covers and details are the ones
@@ -79,6 +85,35 @@ FD:FB:D8:E0:1C:8A:08:E5:F5:09:E3:7E:8F:5A:CA:CE:A4:D8:B1:C6:0E:09:9B:F0:E0:B3:D4
 ```
 
 You can check it with `apksigner verify --print-certs KoSend.apk`.
+
+## Editing books
+
+Open a book in the queue and tap **Edit details**.
+
+- **Title and authors.** Separate several authors with commas. If the title looks like a file name, *Tidy up title* cleans it up.
+- **Series and number.** The number can have decimals, like `2.5` for a novella between two books.
+- **Tags.** Separated by commas. KOReader shows them as keywords and lets you browse books by them.
+- **Cover.** *Change cover* opens your photos, then the crop screen. *Crop* lets you adjust it again later.
+
+Nothing is changed on your phone's copy of the book. When the book is sent, KoSend writes a new
+file with your details:
+
+| Format | What goes into the file |
+|---|---|
+| EPUB | Title, authors, tags and series in the OPF (calibre's series fields and EPUB 3 collections), and the cover |
+| MOBI, AZW3 | Title, authors and tags in the EXTH header, and the cover |
+| FB2 | Title, authors, keywords, sequence and cover |
+| PDF | Title, authors and keywords, appended as an incremental update. Encrypted PDFs are left as they are |
+| CBZ, DJVU, TXT, RTF, DOCX | Nothing: these formats can't hold the details, but the file gets a clear name and the series reaches KOReader's calibre metadata |
+
+If writing fails, for example on a damaged file, the book is sent as it is. *Restore details from
+the file* on the edit page brings back what was in the book.
+
+**Sending an edited book again.** KOReader keeps the cover and details of every book it has
+received and doesn't notice when the file changes. So KoSend sends a changed book under a new
+name, like `Title - Author (2).epub`, and then deletes the old copy from the e-reader. Your
+reading position in the old copy isn't carried over. If KOReader still shows the old cover,
+long-press the book and choose *Refresh cached book information*.
 
 ## Troubleshooting
 
@@ -109,10 +144,13 @@ implements the server side of that protocol, just the part KOReader needs:
 3. **Transfer.** For each book, `SEND_BOOK` with its name and metadata; KOReader
    replies `OK` (or `ERROR`), then the raw file follows. A `NOOP` afterwards
    confirms that KOReader has written everything.
+4. **Books on the device.** After `GET_BOOK_COUNT`, KOReader lists the books it received
+   through calibre. KoSend keeps that list, and uses `DELETE_BOOK` to remove the old copy
+   when an edited book is sent under a new name.
 
-**KoSend is not a calibre replacement.** It has no library, doesn't edit metadata,
-doesn't convert formats and doesn't read books back from the e-reader. It does one
-thing: deliver files from your phone to KOReader.
+**KoSend is not a calibre replacement.** It has no library, doesn't convert formats and
+doesn't read books back from the e-reader. It edits only the few details that keep a
+KOReader library tidy. Its job is to deliver files from your phone to KOReader.
 
 The reference is KOReader's own client,
 [`plugins/calibre.koplugin/wireless.lua`](https://github.com/koreader/koreader/blob/master/plugins/calibre.koplugin/wireless.lua).
@@ -152,6 +190,7 @@ app/src/main/java/dev/kosend/
   KoSendApp.kt         stops the server when the app goes to the background
   BookStore.kt         the queue, saved on the phone
   BookMeta.kt          title, author, details and cover from EPUB, MOBI/AZW3 and PDF
+  BookWriter.kt        writes edited details and covers into EPUB, MOBI/AZW3, FB2 and PDF
   CoverCache.kt        cover thumbnails, decoded in the background
   CoverView.kt         a book's cover, or a placeholder when it has none
   MainActivity.kt      main screen and file import
@@ -159,6 +198,9 @@ app/src/main/java/dev/kosend/
   QueueGestures.kt     drag to reorder
   SwipeToRemove.kt     swipe a book left to reveal Remove
   BookDetail.kt        the book detail page
+  BookEditor.kt        the edit page: details, cover and title clean-up
+  CoverCropper.kt      the crop screen: shapes, rotation, final size
+  CropView.kt          the crop frame you drag and resize
   UpdateChecker.kt     asks GitHub for the latest release
   SettingsActivity.kt  language, storage, version and updates
 design/                logo and README artwork (VectorCraft sources)
