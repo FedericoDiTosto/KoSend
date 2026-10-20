@@ -60,6 +60,11 @@ data class Book(
     val cover: String? = null,
     val addedAt: Long = 0,
     val metaVersion: Int = BookMeta.VERSION,
+    val edited: Boolean = false,
+    val customCover: String? = null,
+    val sentPaths: List<String> = emptyList(),
+    val sentVersion: String = "",
+    val deviceLpath: String = "",
 ) {
     val extension: String get() = fileName.substringAfterLast('.', "").lowercase()
 
@@ -70,12 +75,16 @@ data class Book(
         .put("title", title).put("authors", JSONArray(authors))
         .put("status", status.name).put("message", message)
         .put("details", details.toJson()).put("cover", cover ?: "")
-        .put("addedAt", addedAt).put("metaVersion", metaVersion)
+        .put("addedAt", addedAt).put("metaVersion", metaVersion).put("edited", edited)
+        .put("customCover", customCover ?: "")
+        .put("sentPaths", JSONArray(sentPaths)).put("sentVersion", sentVersion)
+        .put("deviceLpath", deviceLpath)
 
     companion object {
         fun fromJson(o: JSONObject): Book {
             val a = o.optJSONArray("authors") ?: JSONArray()
-            return Book(
+            val sp = o.optJSONArray("sentPaths") ?: JSONArray()
+            val book = Book(
                 id = o.getString("id"),
                 fileName = o.getString("fileName"),
                 path = o.getString("path"),
@@ -90,7 +99,15 @@ data class Book(
                 cover = o.optString("cover").ifEmpty { null },
                 addedAt = o.optLong("addedAt"),
                 metaVersion = o.optInt("metaVersion", 0),
+                edited = o.optBoolean("edited"),
+                customCover = o.optString("customCover").ifEmpty { null },
+                sentPaths = List(sp.length()) { sp.getString(it) },
+                sentVersion = o.optString("sentVersion"),
+                deviceLpath = o.optString("deviceLpath"),
             )
+            if (o.has("sentPaths") || book.status != BookStatus.SENT) return book
+            val lpath = if (book.edited) BookWriter.fileName(book.title, book.authors, book.extension, book.fileName) else book.fileName
+            return book.copy(sentPaths = listOf(lpath), sentVersion = "legacy")
         }
     }
 }
@@ -106,6 +123,14 @@ object BookStore {
     lateinit var booksDir: File
         private set
     private lateinit var coversDir: File
+    lateinit var outgoingDir: File
+        private set
+
+    val deviceSynced: Boolean
+        get() = prefs.getBoolean("device_synced", false)
+
+    fun onDevice(b: Book): Boolean =
+        if (deviceSynced) b.deviceLpath.isNotEmpty() else b.sentPaths.isNotEmpty()
 
     var deleteAfterSend: Boolean
         get() = prefs.getBoolean("delete_after_send", false)
@@ -118,6 +143,7 @@ object BookStore {
         prefs = context.getSharedPreferences("kosend", Context.MODE_PRIVATE)
         booksDir = File(context.filesDir, "books").apply { mkdirs() }
         coversDir = File(context.filesDir, "covers").apply { mkdirs() }
+        outgoingDir = File(context.cacheDir, "outgoing").apply { deleteRecursively(); mkdirs() }
         val loaded = !dbFile.exists() || runCatching {
             val arr = JSONArray(dbFile.readText())
             for (i in 0 until arr.length()) {
@@ -135,7 +161,7 @@ object BookStore {
         if (loaded) {
             val known = books.map { File(it.path).name }.toSet()
             booksDir.listFiles()?.filter { it.name !in known }?.forEach { it.delete() }
-            val knownCovers = books.mapNotNull { it.cover?.let { c -> File(c).name } }.toSet()
+            val knownCovers = books.flatMap { listOfNotNull(it.cover, it.customCover) }.map { File(it).name }.toSet()
             coversDir.listFiles()?.filter { it.name !in knownCovers }?.forEach { it.delete() }
         }
     }
@@ -144,6 +170,8 @@ object BookStore {
         val files = booksDir.listFiles().orEmpty()
         return files.sumOf { it.length() } to files.size
     }
+
+    fun pendingCoverFile(id: String) = File(coversDir, "$id.pending.jpg")
 
     fun saveCover(id: String, bitmap: Bitmap): String? = runCatching {
         val file = File(coversDir, "$id.jpg")
@@ -179,9 +207,54 @@ object BookStore {
     fun setMeta(id: String, meta: BookMeta.Result, cover: String?) {
         val i = books.indexOfFirst { it.id == id }
         if (i < 0) return
-        books[i] = books[i].copy(
+        val b = books[i]
+        books[i] = if (b.edited) b.copy(
+            details = meta.details.copy(series = b.details.series, seriesIndex = b.details.seriesIndex, subjects = b.details.subjects),
+            cover = cover ?: b.cover, metaVersion = BookMeta.VERSION,
+        ) else b.copy(
             title = meta.title, authors = meta.authors, details = meta.details,
-            cover = cover ?: books[i].cover, metaVersion = BookMeta.VERSION,
+            cover = cover ?: b.cover, metaVersion = BookMeta.VERSION,
+        )
+        save(); notifyChanged()
+    }
+
+    @Synchronized
+    fun edit(id: String, edit: BookWriter.Edit, cover: Pair<File, Bitmap>? = null) {
+        val i = books.indexOfFirst { it.id == id }
+        if (i < 0 || books[i].status == BookStatus.SENDING) return
+        val b = books[i]
+        var shown = b.cover
+        var custom = b.customCover
+        if (cover != null) {
+            val target = File(coversDir, "$id.custom-${System.currentTimeMillis()}.jpg")
+            if (cover.first.renameTo(target)) {
+                b.customCover?.let { File(it).delete() }
+                custom = target.path
+                shown = saveCover(id, cover.second) ?: shown
+            }
+        }
+        books[i] = b.copy(
+            title = edit.title, authors = edit.authors,
+            details = b.details.copy(series = edit.series, seriesIndex = edit.seriesIndex, subjects = edit.tags),
+            edited = true, cover = shown, customCover = custom,
+        )
+        save(); notifyChanged()
+    }
+
+    @Synchronized
+    fun revertEdits(id: String, meta: BookMeta.Result) {
+        val i = books.indexOfFirst { it.id == id }
+        if (i < 0 || books[i].status == BookStatus.SENDING) return
+        val b = books[i]
+        var shown = b.cover
+        if (b.customCover != null) {
+            File(b.customCover).delete()
+            shown = meta.cover?.let { saveCover(id, it) }
+            if (shown == null) b.cover?.let { File(it).delete(); CoverCache.evict(it) }
+        }
+        books[i] = b.copy(
+            title = meta.title, authors = meta.authors, details = meta.details,
+            edited = false, cover = shown, customCover = null,
         )
         save(); notifyChanged()
     }
@@ -193,6 +266,22 @@ object BookStore {
         if (status == BookStatus.SENT && deleteAfterSend) File(b.path).delete()
         if (status != BookStatus.SENDING) save()
         notifyChanged()
+    }
+
+    @Synchronized
+    fun recordSent(id: String, lpath: String, version: String) {
+        val i = books.indexOfFirst { it.id == id }
+        if (i < 0) return
+        val b = books[i]
+        books[i] = b.copy(sentPaths = (b.sentPaths - lpath) + lpath, sentVersion = version, deviceLpath = lpath)
+        save()
+    }
+
+    @Synchronized
+    fun syncDevice(present: Map<String, String>) {
+        for (i in books.indices) books[i] = books[i].copy(deviceLpath = present[books[i].id].orEmpty())
+        prefs.edit().putBoolean("device_synced", true).apply()
+        save(); notifyChanged()
     }
 
     @Synchronized
@@ -257,6 +346,7 @@ object BookStore {
     private fun deleteFiles(b: Book) {
         File(b.path).delete()
         b.cover?.let { File(it).delete(); CoverCache.evict(it) }
+        b.customCover?.let { File(it).delete() }
     }
 
     private fun save() {

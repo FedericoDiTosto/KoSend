@@ -152,6 +152,7 @@ class CalibreServer(
         private val output = BufferedOutputStream(socket.getOutputStream(), 64 * 1024)
         private var accepted: Set<String> = emptySet()
         private var deviceName = "KOReader"
+        private var devicePaths: Map<String, String> = emptyMap()
 
         fun close() {
             runCatching { socket.close() }
@@ -227,7 +228,14 @@ class CalibreServer(
                 .put("willUseCachedMetadata", true)
                 .put("supportsSync", false))
             val count = expectOk().optInt("count", 0)
-            repeat(count) { receive() }
+            val present = mutableMapOf<String, String>()
+            repeat(count) {
+                val b = receive().second
+                val lpath = b.optString("lpath")
+                if (lpath.isNotEmpty()) present[lpath] = b.optString("uuid")
+            }
+            devicePaths = present
+            BookStore.syncDevice(present.entries.associate { (lpath, uuid) -> uuid to lpath })
         }
 
         private fun sendPendingBooks() {
@@ -245,56 +253,90 @@ class CalibreServer(
                     continue
                 }
                 BookStore.update(book.id, BookStatus.SENDING)
-                val length = file.length()
-                send(SEND_BOOK, JSONObject()
-                    .put("lpath", book.fileName)
-                    .put("length", length)
-                    .put("thisBook", i)
-                    .put("totalBooks", total)
-                    .put("willStreamBooks", true)
-                    .put("willStreamBinary", true)
-                    .put("wantsSendOkToSendbook", true)
-                    .put("canSupportLpathChanges", true)
-                    .put("metadata", metadataFor(book, length)))
-                val (op, reply) = receive()
-                if (op == ERROR) {
-                    BookStore.update(book.id, BookStatus.ERROR, reply.optString("message").ifEmpty { Messages.REJECTED })
-                    continue
+                val prepared = if (book.edited) BookWriter.write(book, file, BookStore.outgoingDir) else null
+                val sent = try {
+                    sendBook(book, prepared ?: file, i, total)
+                } finally {
+                    prepared?.delete()
                 }
-                if (op != OK) throw IOException("unexpected reply to SEND_BOOK: $op")
-
-                file.inputStream().use { inp ->
-                    val buf = ByteArray(64 * 1024)
-                    var sent = 0L
-                    var lastPct = -1
-                    while (true) {
-                        val n = inp.read(buf)
-                        if (n < 0) break
-                        output.write(buf, 0, n)
-                        sent += n
-                        val pct = if (length > 0) (sent * 100 / length).toInt() else 100
-                        if (pct != lastPct) {
-                            lastPct = pct
-                            BookStore.update(book.id, BookStatus.SENDING, progress = pct)
-                        }
-                    }
-                    output.flush()
-                }
-
-                send(NOOP, JSONObject())
-                expectOk()
-                BookStore.update(book.id, BookStatus.SENT, deviceName)
-                i++
+                if (sent) i++
             }
         }
 
-        private fun metadataFor(book: Book, length: Long) = JSONObject()
+        private fun sendBook(book: Book, file: File, i: Int, total: Int): Boolean {
+            val length = file.length()
+            val version = BookWriter.version(book)
+            val previous = book.deviceLpath.ifEmpty { null }
+            val lpath = if (book.sentPaths.isNotEmpty() && book.sentVersion == version) book.sentPaths.last()
+                else BookWriter.freshPath(lpathFor(book), book.sentPaths + devicePaths.filterValues { it != book.id }.keys)
+            send(SEND_BOOK, JSONObject()
+                .put("lpath", lpath)
+                .put("length", length)
+                .put("thisBook", i)
+                .put("totalBooks", total)
+                .put("willStreamBooks", true)
+                .put("willStreamBinary", true)
+                .put("wantsSendOkToSendbook", true)
+                .put("canSupportLpathChanges", true)
+                .put("metadata", metadataFor(book, lpath, length)))
+            val (op, reply) = receive()
+            if (op == ERROR) {
+                BookStore.update(book.id, BookStatus.ERROR, reply.optString("message").ifEmpty { Messages.REJECTED })
+                return false
+            }
+            if (op != OK) throw IOException("unexpected reply to SEND_BOOK: $op")
+
+            file.inputStream().use { inp ->
+                val buf = ByteArray(64 * 1024)
+                var sent = 0L
+                var lastPct = -1
+                while (true) {
+                    val n = inp.read(buf)
+                    if (n < 0) break
+                    output.write(buf, 0, n)
+                    sent += n
+                    val pct = if (length > 0) (sent * 100 / length).toInt() else 100
+                    if (pct != lastPct) {
+                        lastPct = pct
+                        BookStore.update(book.id, BookStatus.SENDING, progress = pct)
+                    }
+                }
+                output.flush()
+            }
+
+            send(NOOP, JSONObject())
+            expectOk()
+            BookStore.recordSent(book.id, lpath, version)
+            devicePaths = devicePaths - (previous ?: "") + (lpath to book.id)
+            if (previous != null && previous != lpath) runCatching { deleteOnDevice(previous) }
+            BookStore.update(book.id, BookStatus.SENT, deviceName)
+            return true
+        }
+
+        private fun deleteOnDevice(lpath: String) {
+            send(DELETE_BOOK, JSONObject().put("lpaths", JSONArray().put(lpath)))
+            expectOk()
+            val timeout = socket.soTimeout
+            socket.soTimeout = 5_000
+            try {
+                expectOk()
+            } finally {
+                socket.soTimeout = timeout
+            }
+        }
+
+        private fun lpathFor(book: Book) =
+            if (book.edited) BookWriter.fileName(book.title, book.authors, book.extension, book.fileName) else book.fileName
+
+        private fun metadataFor(book: Book, lpath: String, length: Long) = JSONObject()
             .put("uuid", book.id)
-            .put("lpath", book.fileName)
+            .put("lpath", lpath)
             .put("title", book.title)
             .put("authors", JSONArray(book.authors))
             .put("author_sort", book.authors.firstOrNull() ?: "")
-            .put("tags", JSONArray())
+            .put("tags", JSONArray(book.details.subjects))
+            .put("series", book.details.series.ifBlank { JSONObject.NULL })
+            .put("series_index", book.details.seriesIndex.toDoubleOrNull() ?: JSONObject.NULL)
             .put("size", length)
             .put("last_modified", isoNow())
 
@@ -350,6 +392,7 @@ class CalibreServer(
         private const val SEND_BOOK = 8
         private const val GET_INITIALIZATION_INFO = 9
         private const val NOOP = 12
+        private const val DELETE_BOOK = 13
         private const val SET_LIBRARY_INFO = 19
         private const val ERROR = 20
 

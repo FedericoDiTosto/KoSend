@@ -62,6 +62,44 @@
     <string name="meta_file_name">File name</string>
     <string name="meta_added">Added</string>
 
+    <string name="edit_details">Edit details</string>
+    <string name="edit_title">Edit details</string>
+    <string name="edit_save">Save</string>
+    <string name="edit_cover">Cover</string>
+    <string name="edit_cover_hint">Pick an image from your phone</string>
+    <string name="edit_cover_change">Change cover</string>
+    <string name="edit_cover_failed">Couldn’t open that image</string>
+    <string name="edit_cover_crop">Crop</string>
+    <string name="crop_title">Crop cover</string>
+    <string name="crop_done">Done</string>
+    <string name="crop_rotate">Rotate</string>
+    <string name="crop_free">Free</string>
+    <string name="crop_original">Original</string>
+    <string name="crop_book">2:3 book</string>
+    <string name="crop_kindle">5:8 Kindle</string>
+    <string name="crop_kobo">3:4 Kobo</string>
+    <string name="crop_square" translatable="false">1:1</string>
+    <string name="crop_size" translatable="false">%1$d × %2$d px</string>
+    <string name="edit_resend_title">If this book is already on your e-reader</string>
+    <string name="edit_resend_text">If you’ve already sent this book, KOReader keeps the previous cover in memory.</string>
+    <string name="edit_resend_tip">If you still see the old cover, long-press the book in KOReader and choose Refresh cached book information.</string>
+    <string name="edit_field_title">Title</string>
+    <string name="edit_field_authors">Authors</string>
+    <string name="edit_helper_authors">Separate several authors with commas</string>
+    <string name="edit_section_series">Series</string>
+    <string name="edit_field_series">Series name</string>
+    <string name="edit_field_index">Number</string>
+    <string name="edit_field_tags">Tags</string>
+    <string name="edit_helper_tags">Separate with commas. KOReader shows them as keywords.</string>
+    <string name="edit_tidy">Tidy up title</string>
+    <string name="edit_revert">Restore details from the file</string>
+    <string name="edit_error_title">The title can’t be empty</string>
+    <string name="edit_error_index">Enter a number, like 1 or 2.5</string>
+    <string name="edit_note_embed">When the book is sent, KoSend writes these details into the file, so KOReader shows the right title, author and series. Your copy on the phone stays as it is.</string>
+    <string name="edit_note_plain">.%1$s files can’t hold these details, so KoSend gives the file a clear name and passes the series to KOReader’s Calibre metadata.</string>
+    <string name="edit_file_name">On the e-reader: %1$s</string>
+    <string name="detail_edited">Edited details will be written into the file when it’s sent.</string>
+
     <string name="toast_skipped">Unsupported format: %1$s</string>
 
     <string name="error_no_port">No free port between 9090 and 9099</string>

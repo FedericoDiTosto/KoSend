@@ -11,6 +11,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -39,6 +40,20 @@ class MainActivity : AppCompatActivity() {
     private val pickBooks = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         ServerController.pickerOpen = false
         importUris(uris)
+    }
+
+    private var onCoverPicked: ((Uri?) -> Unit)? = null
+
+    private val pickCover = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        ServerController.pickerOpen = false
+        onCoverPicked?.invoke(uri)
+        onCoverPicked = null
+    }
+
+    private fun pickImage(callback: (Uri?) -> Unit) {
+        onCoverPicked = callback
+        ServerController.pickerOpen = true
+        pickCover.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -201,14 +216,14 @@ class MainActivity : AppCompatActivity() {
         io.execute {
             for (book in BookStore.outdated()) {
                 val meta = runCatching { BookMeta.read(File(book.path), book.fileName) }.getOrNull() ?: continue
-                val cover = meta.cover?.let { BookStore.saveCover(book.id, it) }
+                val cover = if (book.customCover != null) null else meta.cover?.let { BookStore.saveCover(book.id, it) }
                 BookStore.setMeta(book.id, meta, cover)
             }
         }
     }
 
     private fun onBookTapped(book: Book) {
-        BookDetail.show(this, book.id, onSendAgain = ::sendAgain, onRemove = ::removeWithUndo)
+        BookDetail.show(this, book.id, onSendAgain = ::sendAgain, onRemove = ::removeWithUndo, pickImage = ::pickImage)
     }
 
     private fun sendAgain(book: Book) {

@@ -26,4 +26,7 @@
     <color name="badge_pdf">#A9584A</color>
     <color name="badge_mobi">#7564A6</color>
     <color name="badge_other">#77726A</color>
+    <color name="warning_container">#3E3210</color>
+    <color name="on_warning_container">#FBE7B0</color>
+    <color name="warning">#F0C04A</color>
 </resources>

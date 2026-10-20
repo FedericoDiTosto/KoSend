@@ -98,6 +98,16 @@
                     android:layout_marginTop="16dp"
                     app:chipSpacingHorizontal="8dp" />
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/edit"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/edit_details"
+                    app:icon="@drawable/ic_edit" />
+
                 <com.google.android.material.card.MaterialCardView
                     style="?attr/materialCardViewFilledStyle"
                     android:layout_width="match_parent"
@@ -178,6 +188,8 @@
                                 android:layout_marginEnd="8dp"
                                 android:layout_weight="1"
                                 android:text="@string/action_retry"
+                                android:ellipsize="end"
+                                android:maxLines="1"
                                 app:icon="@drawable/ic_refresh" />
 
                             <com.google.android.material.button.MaterialButton
@@ -187,6 +199,8 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="@string/action_remove_short"
+                                android:ellipsize="end"
+                                android:maxLines="1"
                                 app:icon="@drawable/ic_delete" />
                         </LinearLayout>
                     </LinearLayout>

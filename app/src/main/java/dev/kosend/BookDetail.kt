@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.RenderEffect
 import android.graphics.Shader
+import android.net.Uri
 import android.os.Build
 import android.text.format.DateUtils
 import android.view.LayoutInflater
@@ -30,7 +31,10 @@ import java.time.format.FormatStyle
 import java.util.Locale
 
 object BookDetail {
-    fun show(context: Context, bookId: String, onSendAgain: (Book) -> Unit, onRemove: (Book) -> Unit) {
+    fun show(
+        context: Context, bookId: String,
+        onSendAgain: (Book) -> Unit, onRemove: (Book) -> Unit, pickImage: ((Uri?) -> Unit) -> Unit,
+    ) {
         val book = BookStore.get(bookId) ?: return
         val dialog = AppCompatDialog(context, R.style.BookDetailDialog)
         val v = LayoutInflater.from(context).inflate(R.layout.dialog_book, null)
@@ -74,10 +78,22 @@ object BookDetail {
         }
 
         bind(context, v, book)
+        v.findViewById<View>(R.id.edit).setOnClickListener { BookEditor.show(context, bookId, pickImage) }
 
+        var shown = book
         val bindStatus = {
             val b = BookStore.get(bookId)
-            if (b == null) dialog.dismiss() else bindStatus(context, v, b, onSendAgain) { dialog.dismiss(); onRemove(b) }
+            if (b == null) dialog.dismiss() else {
+                if (b.title != shown.title || b.authors != shown.authors || b.details != shown.details ||
+                    b.edited != shown.edited || b.cover != shown.cover || b.customCover != shown.customCover) {
+                    shown = b
+                    barTitle.text = b.title
+                    bindHeader(context, v, b)
+                    bindAbout(context, v, b)
+                    bindDetails(context, v, b)
+                }
+                bindStatus(context, v, b, onSendAgain) { dialog.dismiss(); onRemove(b) }
+            }
         }
         bindStatus()
         BookStore.addListener(bindStatus)
@@ -108,6 +124,7 @@ object BookDetail {
         })
 
         val facts = v.findViewById<ChipGroup>(R.id.facts)
+        facts.removeAllViews()
         listOf(book.extension.uppercase(), formatSize(context, book.size), languageName(d.language), year(d.published))
             .filter { it.isNotBlank() }
             .forEach { facts.addView(chip(context, it)) }
@@ -146,6 +163,7 @@ object BookDetail {
         }
 
         val subjects = v.findViewById<ChipGroup>(R.id.subjects)
+        subjects.removeAllViews()
         d.subjects.forEach { subjects.addView(chip(context, it)) }
         subjects.visibility = if (d.subjects.isEmpty()) View.GONE else View.VISIBLE
     }
@@ -184,8 +202,11 @@ object BookDetail {
         status.text = text
 
         val canResend = (b.status == BookStatus.ERROR || b.status == BookStatus.SENT) && b.fileExists
+        v.findViewById<View>(R.id.edit).visibility =
+            if (b.status != BookStatus.SENDING && b.fileExists) View.VISIBLE else View.GONE
         v.findViewById<TextView>(R.id.status_detail).showText(when (b.status) {
-            BookStatus.PENDING -> context.getString(R.string.detail_pending)
+            BookStatus.PENDING -> context.getString(R.string.detail_pending) +
+                if (b.edited) " " + context.getString(R.string.detail_edited) else ""
             BookStatus.SENDING -> context.getString(R.string.detail_sending)
             BookStatus.SENT -> if (b.fileExists) context.getString(R.string.detail_sent_to, b.message.ifEmpty { "KOReader" })
                 else context.getString(R.string.detail_sent_deleted)
@@ -208,6 +229,7 @@ object BookDetail {
 
     private fun rows(context: Context, container: LinearLayout, items: List<Pair<Int, String>>): Boolean {
         val inflater = LayoutInflater.from(context)
+        container.removeAllViews()
         val visible = items.filter { it.second.isNotBlank() }
         visible.forEachIndexed { i, (label, value) ->
             if (i > 0) container.addView(View(context).apply {
