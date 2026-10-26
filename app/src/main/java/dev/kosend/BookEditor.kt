@@ -173,7 +173,7 @@ object BookEditor {
         )
         var autoName = autoName()
         nameLayout.suffixText = ".${book.extension}"
-        fileName.setText(BookWriter.stem(book.customFileName, book.extension).ifEmpty { autoName })
+        fileName.setText(BookWriter.stem(BookWriter.deviceName(book), book.extension).ifEmpty { autoName })
 
         val refresh = {
             val t = title.text.toString().trim()
