@@ -85,7 +85,7 @@ object BookDetail {
             val b = BookStore.get(bookId)
             if (b == null) dialog.dismiss() else {
                 if (b.title != shown.title || b.authors != shown.authors || b.details != shown.details ||
-                    b.edited != shown.edited || b.cover != shown.cover || b.customCover != shown.customCover) {
+                    b.edited != shown.edited || b.customFileName != shown.customFileName || b.cover != shown.cover || b.customCover != shown.customCover) {
                     shown = b
                     barTitle.text = b.title
                     bindHeader(context, v, b)
@@ -180,7 +180,7 @@ object BookDetail {
         v.findViewById<View>(R.id.publication_section).visibility = if (shown) View.VISIBLE else View.GONE
 
         rows(context, v.findViewById(R.id.file), listOf(
-            R.string.meta_file_name to book.fileName,
+            R.string.meta_file_name to BookWriter.deviceName(book),
             R.string.meta_format to book.extension.uppercase(),
             R.string.meta_size to formatSize(context, book.size),
             R.string.meta_added to if (book.addedAt > 0) DateUtils.formatDateTime(
