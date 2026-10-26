@@ -91,16 +91,19 @@
     <string name="edit_field_index">Number</string>
     <string name="edit_field_tags">Tags</string>
     <string name="edit_helper_tags">Separate with commas. KOReader shows them as keywords.</string>
+    <string name="edit_field_description">Description</string>
     <string name="edit_tidy">Tidy up title</string>
     <string name="edit_revert">Restore details from the file</string>
     <string name="edit_error_title">The title can’t be empty</string>
     <string name="edit_error_index">Enter a number, like 1 or 2.5</string>
     <string name="edit_note_embed">When the book is sent, KoSend writes these details into the file, so KOReader shows the right title, author and series. Your copy on the phone stays as it is.</string>
     <string name="edit_note_plain">.%1$s files can’t hold these details, so KoSend gives the file a clear name and passes the series to KOReader’s Calibre metadata.</string>
-    <string name="edit_file_name">On the e-reader: %1$s</string>
+    <string name="edit_field_file_name">File name on the e-reader</string>
+    <string name="edit_helper_file_name">Follows title and author unless you change it</string>
     <string name="detail_edited">Edited details will be written into the file when it’s sent.</string>
 
-    <string name="toast_skipped">Unsupported format: %1$s</string>
+    <string name="skipped_title">Some files weren’t added</string>
+    <string name="skipped_message">KoSend couldn’t recognize these files as books KOReader can open:\n\n%1$s</string>
 
     <string name="error_no_port">No free port between 9090 and 9099</string>
     <string name="error_missing_file">File not found</string>

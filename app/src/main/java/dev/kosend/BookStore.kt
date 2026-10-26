@@ -61,6 +61,8 @@ data class Book(
     val addedAt: Long = 0,
     val metaVersion: Int = BookMeta.VERSION,
     val edited: Boolean = false,
+    val descriptionEdited: Boolean = false,
+    val customFileName: String = "",
     val customCover: String? = null,
     val sentPaths: List<String> = emptyList(),
     val sentVersion: String = "",
@@ -76,6 +78,7 @@ data class Book(
         .put("status", status.name).put("message", message)
         .put("details", details.toJson()).put("cover", cover ?: "")
         .put("addedAt", addedAt).put("metaVersion", metaVersion).put("edited", edited)
+        .put("descriptionEdited", descriptionEdited).put("customFileName", customFileName)
         .put("customCover", customCover ?: "")
         .put("sentPaths", JSONArray(sentPaths)).put("sentVersion", sentVersion)
         .put("deviceLpath", deviceLpath)
@@ -100,14 +103,15 @@ data class Book(
                 addedAt = o.optLong("addedAt"),
                 metaVersion = o.optInt("metaVersion", 0),
                 edited = o.optBoolean("edited"),
+                descriptionEdited = o.optBoolean("descriptionEdited"),
+                customFileName = o.optString("customFileName"),
                 customCover = o.optString("customCover").ifEmpty { null },
                 sentPaths = List(sp.length()) { sp.getString(it) },
                 sentVersion = o.optString("sentVersion"),
                 deviceLpath = o.optString("deviceLpath"),
             )
             if (o.has("sentPaths") || book.status != BookStatus.SENT) return book
-            val lpath = if (book.edited) BookWriter.fileName(book.title, book.authors, book.extension, book.fileName) else book.fileName
-            return book.copy(sentPaths = listOf(lpath), sentVersion = "legacy")
+            return book.copy(sentPaths = listOf(BookWriter.deviceName(book)), sentVersion = "legacy")
         }
     }
 }
@@ -209,7 +213,10 @@ object BookStore {
         if (i < 0) return
         val b = books[i]
         books[i] = if (b.edited) b.copy(
-            details = meta.details.copy(series = b.details.series, seriesIndex = b.details.seriesIndex, subjects = b.details.subjects),
+            details = meta.details.copy(
+                series = b.details.series, seriesIndex = b.details.seriesIndex, subjects = b.details.subjects,
+                description = if (b.descriptionEdited) b.details.description else meta.details.description,
+            ),
             cover = cover ?: b.cover, metaVersion = BookMeta.VERSION,
         ) else b.copy(
             title = meta.title, authors = meta.authors, details = meta.details,
@@ -235,8 +242,12 @@ object BookStore {
         }
         books[i] = b.copy(
             title = edit.title, authors = edit.authors,
-            details = b.details.copy(series = edit.series, seriesIndex = edit.seriesIndex, subjects = edit.tags),
-            edited = true, cover = shown, customCover = custom,
+            details = b.details.copy(
+                series = edit.series, seriesIndex = edit.seriesIndex, subjects = edit.tags,
+                description = edit.description ?: b.details.description,
+            ),
+            edited = true, descriptionEdited = b.descriptionEdited || edit.description != null,
+            customFileName = edit.fileName, cover = shown, customCover = custom,
         )
         save(); notifyChanged()
     }
@@ -254,7 +265,7 @@ object BookStore {
         }
         books[i] = b.copy(
             title = meta.title, authors = meta.authors, details = meta.details,
-            edited = false, cover = shown, customCover = null,
+            edited = false, descriptionEdited = false, customFileName = "", cover = shown, customCover = null,
         )
         save(); notifyChanged()
     }

@@ -21,6 +21,7 @@ import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import java.io.File
@@ -161,11 +162,12 @@ class MainActivity : AppCompatActivity() {
             var added = 0
             val skipped = mutableListOf<String>()
             for (uri in uris) {
-                val name = displayName(uri)
-                val ext = name.substringAfterLast('.', "").lowercase()
-                if (ext !in CalibreServer.SUPPORTED_EXTENSIONS) {
-                    skipped.add(name); continue
+                val shown = displayName(uri)
+                val ext = BookFormat.detect(shown, runCatching { contentResolver.getType(uri) }.getOrNull(), head(uri))
+                if (ext == null) {
+                    skipped.add(shown); continue
                 }
+                val name = BookFormat.nameWith(shown, ext)
                 val id = BookStore.newId()
                 val dest = File(BookStore.booksDir, "$id.$ext")
                 val ok = runCatching {
@@ -191,8 +193,12 @@ class MainActivity : AppCompatActivity() {
                     list.post { list.smoothScrollToPosition(adapter.itemCount - 1) }
                     Toast.makeText(this, resources.getQuantityString(R.plurals.toast_added, added, added), Toast.LENGTH_SHORT).show()
                 }
-                if (skipped.isNotEmpty()) {
-                    Toast.makeText(this, getString(R.string.toast_skipped, skipped.joinToString()), Toast.LENGTH_LONG).show()
+                if (skipped.isNotEmpty() && !isFinishing) {
+                    MaterialAlertDialogBuilder(this)
+                        .setTitle(R.string.skipped_title)
+                        .setMessage(getString(R.string.skipped_message, skipped.joinToString("\n") { "• $it" }))
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show()
                 }
             }
         }
@@ -206,6 +212,19 @@ class MainActivity : AppCompatActivity() {
         }
         return uri.lastPathSegment?.substringAfterLast('/') ?: "book"
     }
+
+    private fun head(uri: Uri): ByteArray = runCatching {
+        contentResolver.openInputStream(uri)?.use { inp ->
+            val buf = ByteArray(BookFormat.HEAD_SIZE)
+            var n = 0
+            while (n < buf.size) {
+                val r = inp.read(buf, n, buf.size - n)
+                if (r < 0) break
+                n += r
+            }
+            buf.copyOf(n)
+        }
+    }.getOrNull() ?: ByteArray(0)
 
     private fun safeFileName(name: String): String {
         val cleaned = name.replace(Regex("""[\\/:*?"<>|\u0000]"""), "_").trim().trimStart('.')

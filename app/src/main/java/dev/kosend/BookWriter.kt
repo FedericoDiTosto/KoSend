@@ -24,6 +24,8 @@ object BookWriter {
         val seriesIndex: String = "",
         val tags: List<String> = emptyList(),
         val cover: ByteArray? = null,
+        val description: String? = null,
+        val fileName: String = "",
     )
 
     private val EMBEDDABLE = setOf("epub", "fb2", "mobi", "azw", "azw3", "pdf")
@@ -36,6 +38,7 @@ object BookWriter {
     fun edit(book: Book) = Edit(
         book.title, book.authors, book.details.series, book.details.seriesIndex, book.details.subjects,
         book.customCover?.let { File(it) }?.takeIf { it.isFile }?.readBytes(),
+        book.details.description.takeIf { book.descriptionEdited },
     )
 
     fun write(book: Book, source: File, dir: File): File? {
@@ -57,20 +60,31 @@ object BookWriter {
     }
 
     fun fileName(title: String, authors: List<String>, extension: String, fallback: String): String {
-        val base = listOf(title, authors.joinToString(" & "))
-            .filter { it.isNotBlank() }
-            .joinToString(" - ")
-            .replace(Regex("""[\\/:*?"<>|\p{Cntrl}]"""), " ")
-            .replace(Regex("""\s+"""), " ")
-            .trim().trim('.', ' ')
-            .take(120).trim()
+        val base = clean(listOf(title, authors.joinToString(" & ")).filter { it.isNotBlank() }.joinToString(" - "))
         return if (base.isEmpty()) fallback else "$base.$extension"
     }
+
+    fun stem(name: String, extension: String): String {
+        val trimmed = name.trim()
+        val typed = trimmed.substringAfterLast('.', "").lowercase()
+        return clean(if (typed == extension || typed in CalibreServer.SUPPORTED_EXTENSIONS) trimmed.substringBeforeLast('.') else trimmed)
+    }
+
+    fun deviceName(book: Book): String =
+        stem(book.customFileName, book.extension).takeIf { it.isNotEmpty() }?.let { "$it.${book.extension}" }
+            ?: if (book.edited) fileName(book.title, book.authors, book.extension, book.fileName) else book.fileName
+
+    private fun clean(name: String) = name
+        .replace(Regex("""[\\/:*?"<>|\p{Cntrl}]"""), " ")
+        .replace(Regex("""\s+"""), " ")
+        .trim().trim('.', ' ')
+        .take(120).trim()
 
     fun version(book: Book): String = if (!book.edited) "" else listOf(
         book.title, book.authors.joinToString("\u0001"), book.details.series, book.details.seriesIndex,
         book.details.subjects.joinToString("\u0001"), book.customCover.orEmpty(),
-    ).joinToString("\u0000").hashCode().toUInt().toString(16)
+    ).plus(listOfNotNull(book.details.description.takeIf { book.descriptionEdited }, book.customFileName.ifEmpty { null }))
+        .joinToString("\u0000").hashCode().toUInt().toString(16)
 
     fun freshPath(base: String, used: List<String>): String {
         if (base !in used) return base
@@ -174,6 +188,7 @@ object BookWriter {
         }
         elements(block, "title").forEach(::dropElement)
         elements(block, "subject").forEach(::dropElement)
+        if (e.description != null) elements(block, "description").forEach(::dropElement)
         elements(block, "creator").forEach { m ->
             val role = attr(m.value, "role") ?: refined(attr(m.value, "id"), "role")
             if (role == null || role == "aut") dropElement(m)
@@ -196,6 +211,7 @@ object BookWriter {
             if (epub3) lines += "<$meta refines=\"#kosend-author-${i + 1}\" property=\"role\" scheme=\"marc:relators\">aut</$meta>"
         }
         e.tags.forEach { lines += "<$dc:subject$dcNs>${xml(it)}</$dc:subject>" }
+        e.description?.takeIf { it.isNotBlank() }?.let { lines += "<$dc:description$dcNs>${xml(it)}</$dc:description>" }
         if (e.series.isNotBlank()) {
             lines += "<$meta name=\"calibre:series\" content=\"${xml(e.series)}\"/>"
             if (e.seriesIndex.isNotBlank()) lines += "<$meta name=\"calibre:series_index\" content=\"${xml(e.seriesIndex)}\"/>"
@@ -336,7 +352,10 @@ object BookWriter {
         val enc = charset.newEncoder()
         fun t(s: String) = xml(s, enc)
 
-        val drop = listOfNotNull("author", "book-title", "keywords", "sequence", "coverpage".takeIf { e.cover != null }).flatMap { name -> elements(block, name).map { it.range } }
+        val drop = listOfNotNull(
+            "author", "book-title", "keywords", "sequence",
+            "coverpage".takeIf { e.cover != null }, "annotation".takeIf { e.description != null },
+        ).flatMap { name -> elements(block, name).map { it.range } }
         var cleaned = removeRanges(block, drop)
 
         val people = e.authors.joinToString("") { a ->
@@ -347,6 +366,10 @@ object BookWriter {
             "\n$indent<${p}author>$name</${p}author>"
         }
         val titleLine = "\n$indent<${p}book-title>${t(e.title)}</${p}book-title>"
+        val annotationLine = e.description?.takeIf { it.isNotBlank() }?.let { d ->
+            val paragraphs = d.split(Regex("""\n+""")).map { it.trim() }.filter { it.isNotEmpty() }
+            "\n$indent<${p}annotation>" + paragraphs.joinToString("") { "<${p}p>${t(it)}</${p}p>" } + "</${p}annotation>"
+        }.orEmpty()
         val keywords = if (e.tags.isEmpty()) "" else "\n$indent<${p}keywords>${t(e.tags.joinToString(", "))}</${p}keywords>"
         val sequence = if (e.series.isBlank()) "" else
             "\n$indent<${p}sequence name=\"${t(e.series)}\"" + (if (e.seriesIndex.isNotBlank()) " number=\"${t(e.seriesIndex)}\"" else "") + "/>"
@@ -367,7 +390,7 @@ object BookWriter {
             trailing to (if (lang == null) coverLine else "") + sequence,
             (lang ?: trailing) to (if (lang != null) coverLine else ""),
             (annotation ?: afterGenres) to keywords,
-            afterGenres to people + titleLine,
+            afterGenres to people + titleLine + annotationLine,
         )
         val sb = StringBuilder(cleaned)
         inserts.withIndex().sortedWith(compareByDescending<IndexedValue<Pair<Int, String>>> { it.value.first }.thenBy { it.index })
@@ -485,9 +508,10 @@ object BookWriter {
         val headerEnd = 16 + u32(r, 20)
         if (headerEnd < 132 || headerEnd > r.size) return null
         val charset = if (u32(r, 28) == 65001) Charsets.UTF_8 else Charset.forName("windows-1252")
-        val replaced = setOf(100, 105, 503)
+        val replaced = setOfNotNull(100, 105, 503, 103.takeIf { e.description != null })
         val records = exth(r).orEmpty().filter { it.first !in replaced }.toMutableList()
         e.authors.forEach { records.add(100 to it.toByteArray(charset)) }
+        e.description?.takeIf { it.isNotBlank() }?.let { records.add(103 to it.toByteArray(charset)) }
         e.tags.forEach { records.add(105 to it.toByteArray(charset)) }
         records.add(503 to e.title.toByteArray(charset))
 
@@ -543,6 +567,7 @@ object BookWriter {
         w("$size 0 obj\n<< /Title ${pdfString(e.title)}")
         if (e.authors.isNotEmpty()) w(" /Author ${pdfString(e.authors.joinToString(", "))}")
         if (e.tags.isNotEmpty()) w(" /Keywords ${pdfString(e.tags.joinToString(", "))}")
+        e.description?.takeIf { it.isNotBlank() }?.let { w(" /Subject ${pdfString(it)}") }
         w(" /ModDate (D:${stamp}Z) >>\nendobj\n")
         val xrefOffset = length + buf.size()
         if (!stream) {

@@ -360,6 +360,80 @@ class BookWriterTest {
     }
 
     @Test
+    fun opfDescriptionIsKeptUnlessEdited() {
+        val opf = epub2Opf.replace("<dc:language>", "<dc:description>&lt;p&gt;Original&lt;/p&gt;</dc:description>\n    <dc:language>")
+        assertTrue("&lt;p&gt;Original&lt;/p&gt;" in BookWriter.opf(opf, edit)!!)
+
+        val out = BookWriter.opf(opf, edit.copy(description = "A boy & a wizard.\n\nSecond part."))!!
+        assertFalse("Original" in out)
+        assertTrue("<dc:description>A boy &amp; a wizard.\n\nSecond part.</dc:description>" in out)
+        assertWellFormed(out)
+
+        val cleared = BookWriter.opf(opf, edit.copy(description = ""))!!
+        assertFalse("description" in cleared)
+        assertWellFormed(cleared)
+    }
+
+    @Test
+    fun fb2AnnotationIsReplaced() {
+        val fb2 = """<?xml version="1.0" encoding="UTF-8"?>
+<FictionBook xmlns="http://www.gribuser.ru/xml/fictionbook/2.0">
+ <description>
+  <title-info>
+   <genre>sf</genre>
+   <book-title>old</book-title>
+   <annotation><p>About</p></annotation>
+   <lang>en</lang>
+  </title-info>
+ </description>
+ <body><p>Text</p></body>
+</FictionBook>""".toByteArray()
+        val out = String(BookWriter.fb2(fb2, edit.copy(description = "First <one>.\nSecond."))!!)
+        assertFalse("About" in out)
+        assertTrue("<annotation><p>First &lt;one&gt;.</p><p>Second.</p></annotation>" in out)
+        assertTrue(out.indexOf("<annotation>") > out.indexOf("</book-title>"))
+        assertTrue(out.indexOf("<keywords>") > out.indexOf("</annotation>"))
+        assertTrue(out.indexOf("<lang>") > out.indexOf("<keywords>"))
+        assertWellFormed(out)
+
+        assertTrue("<p>About</p>" in String(BookWriter.fb2(fb2, edit)!!))
+    }
+
+    @Test
+    fun mobiDescriptionIsWritten() {
+        val src = tmp.newFile("book.mobi")
+        src.writeBytes(mobiFile("old_title", "Unknown"))
+        val b = book("mobi").let { it.copy(details = it.details.copy(description = "New blurb"), descriptionEdited = true) }
+        val text = String(BookWriter.write(b, src, tmp.newFolder())!!.readBytes(), Charsets.UTF_8)
+        assertTrue("New blurb" in text)
+        assertTrue("KEEP-ME" in text)
+    }
+
+    @Test
+    fun descriptionOnlyChangesVersionWhenEdited() {
+        val b = book("epub")
+        val other = b.copy(details = b.details.copy(description = "From the file"))
+        assertEquals(BookWriter.version(b), BookWriter.version(other))
+        assertFalse(BookWriter.version(other) == BookWriter.version(other.copy(descriptionEdited = true)))
+        assertNull(BookWriter.edit(other).description)
+        assertEquals("From the file", BookWriter.edit(other.copy(descriptionEdited = true)).description)
+    }
+
+    @Test
+    fun customFileNameWinsOnDevice() {
+        val b = book("epub")
+        assertEquals("Dune - Frank Herbert.epub", BookWriter.deviceName(b.copy(title = "Dune", authors = listOf("Frank Herbert"))))
+        assertEquals("file.epub", BookWriter.deviceName(b.copy(edited = false)))
+        assertEquals("My copy.epub", BookWriter.deviceName(b.copy(customFileName = "My copy")))
+        assertEquals("a b.epub", BookWriter.deviceName(b.copy(customFileName = " a/b.EPUB ")))
+        assertEquals("notes.epub", BookWriter.deviceName(b.copy(customFileName = "notes.pdf")))
+        assertEquals("v1.2.epub", BookWriter.deviceName(b.copy(customFileName = "v1.2")))
+        assertEquals(BookWriter.deviceName(b), BookWriter.deviceName(b.copy(customFileName = " .. ")))
+        assertEquals(BookWriter.version(b), BookWriter.version(b.copy(customFileName = "")))
+        assertFalse(BookWriter.version(b) == BookWriter.version(b.copy(customFileName = "My copy")))
+    }
+
+    @Test
     fun messyTitlesAreTidied() {
         assertEquals("Harry Potter 1", BookEditor.tidyTitle("harry-potter-1-eng_final"))
         assertEquals("The Hobbit", BookEditor.tidyTitle("The_Hobbit (z-library.sk)"))

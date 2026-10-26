@@ -88,16 +88,19 @@
     <string name="edit_field_index">Numero</string>
     <string name="edit_field_tags">Tag</string>
     <string name="edit_helper_tags">Separali con una virgola. KOReader li mostra come parole chiave.</string>
+    <string name="edit_field_description">Descrizione</string>
     <string name="edit_tidy">Sistema il titolo</string>
     <string name="edit_revert">Ripristina i dati del file</string>
     <string name="edit_error_title">Il titolo non può essere vuoto</string>
     <string name="edit_error_index">Inserisci un numero, ad esempio 1 o 2,5</string>
     <string name="edit_note_embed">Quando il libro viene inviato, KoSend scrive questi dati dentro il file, così KOReader mostra titolo, autore e serie giusti. La copia sul telefono resta com’è.</string>
     <string name="edit_note_plain">I file .%1$s non possono contenere questi dati: KoSend dà al file un nome chiaro e passa la serie ai metadati Calibre di KOReader.</string>
-    <string name="edit_file_name">Sull’e-reader: %1$s</string>
+    <string name="edit_field_file_name">Nome del file sull’e-reader</string>
+    <string name="edit_helper_file_name">Segue titolo e autore, a meno che tu non lo cambi</string>
     <string name="detail_edited">I dati modificati verranno scritti nel file al momento dell’invio.</string>
 
-    <string name="toast_skipped">Formato non supportato: %1$s</string>
+    <string name="skipped_title">Alcuni file non sono stati aggiunti</string>
+    <string name="skipped_message">KoSend non ha riconosciuto questi file come libri che KOReader può aprire:\n\n%1$s</string>
     <string name="error_no_port">Nessuna porta libera tra 9090 e 9099</string>
     <string name="error_missing_file">File non trovato</string>
     <string name="error_rejected">Rifiutato da KOReader</string>

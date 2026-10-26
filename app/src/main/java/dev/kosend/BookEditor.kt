@@ -75,8 +75,10 @@ object BookEditor {
         val series = v.findViewById<TextInputEditText>(R.id.edit_series_input)
         val index = v.findViewById<TextInputEditText>(R.id.edit_index_input)
         val tags = v.findViewById<TextInputEditText>(R.id.edit_tags_input)
+        val description = v.findViewById<TextInputEditText>(R.id.edit_description_input)
         val tidy = v.findViewById<View>(R.id.edit_tidy)
-        val fileName = v.findViewById<TextView>(R.id.edit_file_name)
+        val nameLayout = v.findViewById<TextInputLayout>(R.id.edit_file_name_layout)
+        val fileName = v.findViewById<TextInputEditText>(R.id.edit_file_name_input)
         val revert = v.findViewById<View>(R.id.edit_revert)
 
         val coverRow = v.findViewById<View>(R.id.edit_cover_row)
@@ -158,18 +160,28 @@ object BookEditor {
         series.setText(book.details.series)
         index.setText(book.details.seriesIndex)
         tags.setText(book.details.subjects.joinToString(", "))
+        description.setText(book.details.description)
+        if (!BookWriter.canEmbed(book.extension)) v.findViewById<View>(R.id.edit_description_layout).visibility = View.GONE
 
         v.findViewById<TextView>(R.id.edit_note).text =
             if (BookWriter.canEmbed(book.extension)) context.getString(R.string.edit_note_embed)
             else context.getString(R.string.edit_note_plain, book.extension)
 
+        fun autoName() = BookWriter.stem(
+            BookWriter.fileName(title.text.toString().trim(), BookWriter.splitList(authors.text.toString()), book.extension, book.fileName),
+            book.extension,
+        )
+        var autoName = autoName()
+        nameLayout.suffixText = ".${book.extension}"
+        fileName.setText(BookWriter.stem(book.customFileName, book.extension).ifEmpty { autoName })
+
         val refresh = {
             val t = title.text.toString().trim()
             tidy.visibility = if (tidyTitle(t) != t && t.isNotEmpty()) View.VISIBLE else View.GONE
-            fileName.text = context.getString(
-                R.string.edit_file_name,
-                BookWriter.fileName(t, BookWriter.splitList(authors.text.toString()), book.extension, book.fileName),
-            )
+            val next = autoName()
+            if (BookWriter.stem(fileName.text.toString(), book.extension) == autoName && next != autoName) fileName.setText(next)
+            autoName = next
+            nameLayout.placeholderText = next
             titleLayout.error = null
             indexLayout.error = null
         }
@@ -201,12 +213,15 @@ object BookEditor {
             if (t.isEmpty()) { titleLayout.error = context.getString(R.string.edit_error_title); title.requestFocus(); return@setOnClickListener }
             if (i == null) { indexLayout.error = context.getString(R.string.edit_error_index); index.requestFocus(); return@setOnClickListener }
             val s = series.text.toString().trim().replace(Regex("""\s+"""), " ")
+            val d = description.text.toString().trim().replace(Regex("""\n{3,}"""), "\n\n")
             BookStore.edit(bookId, BookWriter.Edit(
                 title = t,
                 authors = BookWriter.splitList(authors.text.toString()),
                 series = s,
                 seriesIndex = if (s.isEmpty()) "" else i,
                 tags = BookWriter.splitList(tags.text.toString()),
+                description = d.takeIf { book.descriptionEdited || it != book.details.description },
+                fileName = BookWriter.stem(fileName.text.toString(), book.extension).takeIf { it != autoName }.orEmpty(),
             ), pending?.takeIf { pendingFile.isFile }?.let { pendingFile to it })
             dialog.dismiss()
         }

@@ -325,8 +325,7 @@ class CalibreServer(
             }
         }
 
-        private fun lpathFor(book: Book) =
-            if (book.edited) BookWriter.fileName(book.title, book.authors, book.extension, book.fileName) else book.fileName
+        private fun lpathFor(book: Book) = BookWriter.deviceName(book)
 
         private fun metadataFor(book: Book, lpath: String, length: Long) = JSONObject()
             .put("uuid", book.id)
