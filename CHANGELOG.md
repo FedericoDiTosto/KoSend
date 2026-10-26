@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.3.0 (2026-10-26)
+
+- Edit a book's description on the edit page. It's written into the file when the book is sent, like the other details.
+- Choose the file name the book gets on the e-reader. The field shows the name the book will really be sent with, and follows title and author unless you change it.
+- Books whose name has no extension, or a misleading one, are recognized from their content, so they're added with the right format.
+- Files KoSend can't add are now listed in a dialog that explains why, instead of a short message.
+
 ## v1.2.0 (2026-10-20)
 
 - Edit a book before sending it: tap Edit details on its page to fix the title and authors, set a series and its number, and add tags. KOReader then sorts and groups the book properly, and shows the tags as keywords.
